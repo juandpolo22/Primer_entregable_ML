@@ -1,0 +1,1592 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>4. Análisis univariado &#8212; Predicción de reingreso hospitalario antes de 30 días</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/04_eda_univariado';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="5. Análisis bivariado" href="05_eda_bivariado.html" />
+    <link rel="prev" title="3. EDA de la variable objetivo: reingreso antes de 30 días" href="03_eda_objetivo.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="01_introduccion.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Predicción de reingreso hospitalario antes de 30 días - Home"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Predicción de reingreso hospitalario antes de 30 días - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="01_introduccion.html">
+                    1. Introducción: reingreso hospitalario antes de 30 días
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="02_datos.html">2. La base de datos: tamaño, calidad y representatividad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_eda_objetivo.html">3. EDA de la variable objetivo: reingreso antes de 30 días</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">4. Análisis univariado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_eda_bivariado.html">5. Análisis bivariado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_eda_multivariado.html">6. EDA multivariado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_data_leakage.html">7. Auditoría de data leakage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_preprocesamiento.html">8. Preprocesamiento y Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_modelo_base.html">9. Modelo base: línea base trivial y regresión logística</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10_conclusiones.html">10. Conclusiones, limitaciones y checklist</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/notebooks/04_eda_univariado.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>4. Análisis univariado</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#variables-numericas">Variables numéricas</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#siguen-una-distribucion-normal-pruebas-de-normalidad-con-cautela">¿Siguen una distribución normal? (pruebas de normalidad, con cautela)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ayuda-la-transformacion-logaritmica">¿Ayuda la transformación logarítmica?</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#variables-categoricas">Variables categóricas</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#medicamentos">Medicamentos</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="analisis-univariado">
+<h1>4. Análisis univariado<a class="headerlink" href="#analisis-univariado" title="Link to this heading">#</a></h1>
+<p><strong>Qué hacemos:</strong> describir cada variable por separado, según su tipo. Numéricas: media, mediana, desviación, percentiles, IQR,
+asimetría, curtosis, valores atípicos, histogramas y diagramas de caja. Categóricas: cardinalidad, frecuencias, categorías raras
+y faltantes.</p>
+<p><strong>Por qué:</strong> las decisiones de preprocesamiento (transformaciones, agrupación de categorías, codificación) salen de aquí.
+Todo usa solo el conjunto de entrenamiento.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Markdown</span><span class="p">,</span> <span class="n">display</span>
+
+<span class="n">project_root</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">"_config.yml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">project_root</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">project_root</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">"No se encontró _config.yml. Ejecuta el notebook dentro de la carpeta del libro."</span><span class="p">)</span>
+    <span class="n">project_root</span> <span class="o">=</span> <span class="n">project_root</span><span class="o">.</span><span class="n">parent</span>
+<span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_root</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">_folder</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"tables"</span><span class="p">,</span> <span class="s2">"figures"</span><span class="p">):</span>          <span class="c1"># se crean si no existen</span>
+    <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">_folder</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.project_utils</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">configure_plots</span><span class="p">()</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.max_columns"</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.width"</span><span class="p">,</span> <span class="mi">170</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.max_colwidth"</span><span class="p">,</span> <span class="mi">70</span><span class="p">)</span>
+<span class="n">TABLES</span> <span class="o">=</span> <span class="n">project_root</span> <span class="o">/</span> <span class="s2">"tables"</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">md_out</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">Markdown</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+
+<span class="n">train</span> <span class="o">=</span> <span class="n">load_train</span><span class="p">()</span>
+<span class="n">frame</span> <span class="o">=</span> <span class="n">prepare_frame</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="n">num_cols</span><span class="p">,</span> <span class="n">cat_cols</span> <span class="o">=</span> <span class="n">column_types</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">TARGET</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="variables-numericas">
+<h2>Variables numéricas<a class="headerlink" href="#variables-numericas" title="Link to this heading">#</a></h2>
+<p>Además de las ocho variables de conteo, se agrega <code class="docutils literal notranslate"><span class="pre">age_mid</span></code>, el punto medio del rango de edad (<code class="docutils literal notranslate"><span class="pre">[50-60)</span></code> → 55). Los identificadores
+codificados (tipo de ingreso, destino al alta y origen del ingreso) <strong>se tratan como categorías</strong>, no como cantidades.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">resumen_num</span> <span class="o">=</span> <span class="n">numeric_summary</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">num_cols</span><span class="p">])</span>
+<span class="n">resumen_num</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"estadisticas_numericas.csv"</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">resumen_num</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">sesgadas</span> <span class="o">=</span> <span class="n">resumen_num</span><span class="p">[</span><span class="s2">"asimetría"</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ceros</span> <span class="o">=</span> <span class="n">resumen_num</span><span class="p">[</span><span class="s2">"ceros_%"</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">asim</span> <span class="o">=</span> <span class="n">sesgadas</span><span class="p">[</span><span class="n">sesgadas</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">muchos_ceros</span> <span class="o">=</span> <span class="n">ceros</span><span class="p">[</span><span class="n">ceros</span> <span class="o">&gt;</span> <span class="mi">30</span><span class="p">]</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- Variables con asimetría &gt; 1: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'**</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">** (</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">asim</span><span class="p">[</span><span class="n">v</span><span class="p">],</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s1">)'</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">asim</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">asim</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'ninguna'</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="sa">f</span><span class="s2">"- Variables con más de 30 % de ceros: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'**</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">** (</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">muchos_ceros</span><span class="p">[</span><span class="n">v</span><span class="p">],</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s1"> %)'</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">muchos_ceros</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">muchos_ceros</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'ninguna'</span><span class="si">}</span><span class="s2">.</span><span class="se">\n\n</span><span class="s2">"</span>
+       <span class="o">+</span> <span class="p">(</span><span class="s2">"Son variables de conteo con **cola larga hacia la derecha**: la mayoría de los pacientes tiene valores bajos y unos pocos valores muy altos. "</span>
+          <span class="s2">"Esto sugiere una transformación logarítmica (se decide en el capítulo 8)."</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">asim</span><span class="p">)</span> <span class="k">else</span>
+          <span class="s2">"Ninguna requiere transformación por asimetría."</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>count</th>
+      <th>faltantes</th>
+      <th>faltantes_%</th>
+      <th>media</th>
+      <th>mediana</th>
+      <th>desv_est</th>
+      <th>mínimo</th>
+      <th>p01</th>
+      <th>p25</th>
+      <th>p50</th>
+      <th>p75</th>
+      <th>p99</th>
+      <th>máximo</th>
+      <th>IQR</th>
+      <th>asimetría</th>
+      <th>curtosis</th>
+      <th>ceros_%</th>
+      <th>únicos</th>
+      <th>outliers_IQR_%</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>time_in_hospital</th>
+      <td>81413</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>4.40</td>
+      <td>4.0</td>
+      <td>2.99</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>2.0</td>
+      <td>4.0</td>
+      <td>6.0</td>
+      <td>14.0</td>
+      <td>14.0</td>
+      <td>4.0</td>
+      <td>1.13</td>
+      <td>0.85</td>
+      <td>0.00</td>
+      <td>14</td>
+      <td>2.22</td>
+    </tr>
+    <tr>
+      <th>num_lab_procedures</th>
+      <td>81413</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>43.08</td>
+      <td>44.0</td>
+      <td>19.69</td>
+      <td>1.0</td>
+      <td>1.0</td>
+      <td>31.0</td>
+      <td>44.0</td>
+      <td>57.0</td>
+      <td>85.0</td>
+      <td>132.0</td>
+      <td>26.0</td>
+      <td>-0.23</td>
+      <td>-0.25</td>
+      <td>0.00</td>
+      <td>116</td>
+      <td>0.15</td>
+    </tr>
+    <tr>
+      <th>num_procedures</th>
+      <td>81413</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>1.34</td>
+      <td>1.0</td>
+      <td>1.70</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>2.0</td>
+      <td>6.0</td>
+      <td>6.0</td>
+      <td>2.0</td>
+      <td>1.32</td>
+      <td>0.86</td>
+      <td>45.80</td>
+      <td>7</td>
+      <td>4.87</td>
+    </tr>
+    <tr>
+      <th>num_medications</th>
+      <td>81413</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>16.03</td>
+      <td>15.0</td>
+      <td>8.14</td>
+      <td>1.0</td>
+      <td>3.0</td>
+      <td>10.0</td>
+      <td>15.0</td>
+      <td>20.0</td>
+      <td>43.0</td>
+      <td>81.0</td>
+      <td>10.0</td>
+      <td>1.33</td>
+      <td>3.49</td>
+      <td>0.00</td>
+      <td>75</td>
+      <td>2.52</td>
+    </tr>
+    <tr>
+      <th>number_outpatient</th>
+      <td>81413</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>0.37</td>
+      <td>0.0</td>
+      <td>1.27</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>5.0</td>
+      <td>42.0</td>
+      <td>0.0</td>
+      <td>8.82</td>
+      <td>145.60</td>
+      <td>83.57</td>
+      <td>37</td>
+      <td>16.43</td>
+    </tr>
+    <tr>
+      <th>number_emergency</th>
+      <td>81413</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>0.20</td>
+      <td>0.0</td>
+      <td>0.96</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>3.0</td>
+      <td>76.0</td>
+      <td>0.0</td>
+      <td>24.19</td>
+      <td>1269.21</td>
+      <td>88.86</td>
+      <td>32</td>
+      <td>11.14</td>
+    </tr>
+    <tr>
+      <th>number_inpatient</th>
+      <td>81413</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>0.64</td>
+      <td>0.0</td>
+      <td>1.27</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>1.0</td>
+      <td>6.0</td>
+      <td>21.0</td>
+      <td>1.0</td>
+      <td>3.69</td>
+      <td>21.82</td>
+      <td>66.48</td>
+      <td>21</td>
+      <td>6.95</td>
+    </tr>
+    <tr>
+      <th>number_diagnoses</th>
+      <td>81413</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>7.42</td>
+      <td>8.0</td>
+      <td>1.94</td>
+      <td>1.0</td>
+      <td>2.0</td>
+      <td>6.0</td>
+      <td>8.0</td>
+      <td>9.0</td>
+      <td>9.0</td>
+      <td>16.0</td>
+      <td>3.0</td>
+      <td>-0.88</td>
+      <td>-0.07</td>
+      <td>0.00</td>
+      <td>16</td>
+      <td>0.28</td>
+    </tr>
+    <tr>
+      <th>age_mid</th>
+      <td>81413</td>
+      <td>0</td>
+      <td>0.0</td>
+      <td>65.97</td>
+      <td>65.0</td>
+      <td>15.95</td>
+      <td>5.0</td>
+      <td>25.0</td>
+      <td>55.0</td>
+      <td>65.0</td>
+      <td>75.0</td>
+      <td>95.0</td>
+      <td>95.0</td>
+      <td>20.0</td>
+      <td>-0.64</td>
+      <td>0.30</td>
+      <td>0.00</td>
+      <td>10</td>
+      <td>0.86</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><ul class="simple">
+<li><p>Variables con asimetría &gt; 1: <strong>number_emergency</strong> (24,19), <strong>number_outpatient</strong> (8,82), <strong>number_inpatient</strong> (3,69), <strong>num_medications</strong> (1,33), <strong>num_procedures</strong> (1,32), <strong>time_in_hospital</strong> (1,13).</p></li>
+<li><p>Variables con más de 30 % de ceros: <strong>number_emergency</strong> (88,9 %), <strong>number_outpatient</strong> (83,6 %), <strong>number_inpatient</strong> (66,5 %), <strong>num_procedures</strong> (45,8 %).</p></li>
+</ul>
+<p>Son variables de conteo con <strong>cola larga hacia la derecha</strong>: la mayoría de los pacientes tiene valores bajos y unos pocos valores muy altos. Esto sugiere una transformación logarítmica (se decide en el capítulo 8).</p>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">9</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">num_cols</span><span class="p">):</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">discrete</span><span class="o">=</span><span class="n">s</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="mi">30</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#4c78a8"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">c</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">()[</span><span class="nb">len</span><span class="p">(</span><span class="n">num_cols</span><span class="p">):]:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">"off"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">"Histogramas de las variables numéricas (entrenamiento)"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.01</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">save_figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"04_histogramas_numericas.png"</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/687465f2452ae314d3e5415e647452c1819580bdd96127ffdad1682c4ca1bf0a.png" src="../_images/687465f2452ae314d3e5415e647452c1819580bdd96127ffdad1682c4ca1bf0a.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">num_cols</span><span class="p">):</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#9ecae9"</span><span class="p">,</span> <span class="n">fliersize</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">c</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">()[</span><span class="nb">len</span><span class="p">(</span><span class="n">num_cols</span><span class="p">):]:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">"off"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">"Diagramas de caja (los puntos son valores atípicos por la regla del IQR)"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.01</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">save_figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"04_boxplots_numericas.png"</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/edb3131145af6586e4f45f7c1b8f76ce55ffd99908e31fec5ae27a94312d09fe.png" src="../_images/edb3131145af6586e4f45f7c1b8f76ce55ffd99908e31fec5ae27a94312d09fe.png" />
+</div>
+</div>
+<section id="siguen-una-distribucion-normal-pruebas-de-normalidad-con-cautela">
+<h3>¿Siguen una distribución normal? (pruebas de normalidad, con cautela)<a class="headerlink" href="#siguen-una-distribucion-normal-pruebas-de-normalidad-con-cautela" title="Link to this heading">#</a></h3>
+<p>El enunciado pide pruebas de normalidad cuando sean relevantes. Aquí <strong>no se usan como criterio de decisión</strong>: con más de 80.000 encuentros de entrenamiento, pruebas como Shapiro–Wilk, D’Agostino–Pearson o Kolmogorov–Smirnov rechazan la normalidad ante desviaciones mínimas y sin relevancia práctica (el p-valor refleja sobre todo el tamaño de la muestra). Además, son variables de <strong>conteo discretas</strong>, que por construcción no pueden ser normales. Por eso la forma de cada distribución se juzga con la <strong>asimetría</strong>, la <strong>curtosis</strong> (tabla anterior) y con gráficos: los histogramas, los diagramas de caja y los <strong>gráficos Q-Q</strong> frente a la normal que se muestran a continuación. Ningún método del libro (regresión logística, bootstrap, pruebas no paramétricas) exige normalidad de las predictoras.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">stats</span> <span class="k">as</span> <span class="n">st</span>
+<span class="n">qq_vars</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"time_in_hospital"</span><span class="p">,</span> <span class="s2">"num_medications"</span><span class="p">,</span> <span class="s2">"number_inpatient"</span><span class="p">]</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">qq_vars</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">4.6</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">qq_vars</span><span class="p">),</span> <span class="mf">4.2</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">axes</span><span class="p">),</span> <span class="n">qq_vars</span><span class="p">):</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="p">(</span><span class="n">osm</span><span class="p">,</span> <span class="n">osr</span><span class="p">),</span> <span class="p">(</span><span class="n">pendiente</span><span class="p">,</span> <span class="n">intercepto</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">probplot</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="s2">"norm"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">osm</span><span class="p">,</span> <span class="n">osr</span><span class="p">,</span> <span class="s2">"o"</span><span class="p">,</span> <span class="n">ms</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#4c78a8"</span><span class="p">,</span> <span class="n">rasterized</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">osm</span><span class="p">,</span> <span class="n">pendiente</span> <span class="o">*</span> <span class="n">osm</span> <span class="o">+</span> <span class="n">intercepto</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#e45756"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"referencia normal"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="se">\n</span><span class="s2">asimetría </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">skew</span><span class="p">(),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> · curtosis </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">kurt</span><span class="p">(),</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"cuantiles teóricos N(0, 1)"</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"cuantiles observados"</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">axes</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">"upper left"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">"Gráficos Q-Q frente a la distribución normal (entrenamiento)"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.02</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">save_figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"04_qqplots_numericas.png"</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">md_out</span><span class="p">(</span><span class="s2">"**Interpretación.** Ninguna de las tres sigue la recta: los escalones horizontales son propios de conteos discretos. "</span>
+       <span class="s2">"`time_in_hospital` está acotada entre 1 y 14 días, por lo que ambos extremos se aplanan; `num_medications` se ajusta en el centro, "</span>
+       <span class="s2">"pero su cola derecha es más pesada que la normal; `number_inpatient` se concentra en 0 y tiene una cola derecha muy larga "</span>
+       <span class="s2">"(asimetría y curtosis altas). Esto confirma lo que muestran asimetría y curtosis y motiva evaluar `log1p` en la sección siguiente."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/6f553ff8dcd08f5495fb2911f70239870a82cba950fc8c42220530a255daf9a9.png" src="../_images/6f553ff8dcd08f5495fb2911f70239870a82cba950fc8c42220530a255daf9a9.png" />
+<p><strong>Interpretación.</strong> Ninguna de las tres sigue la recta: los escalones horizontales son propios de conteos discretos. <code class="docutils literal notranslate"><span class="pre">time_in_hospital</span></code> está acotada entre 1 y 14 días, por lo que ambos extremos se aplanan; <code class="docutils literal notranslate"><span class="pre">num_medications</span></code> se ajusta en el centro, pero su cola derecha es más pesada que la normal; <code class="docutils literal notranslate"><span class="pre">number_inpatient</span></code> se concentra en 0 y tiene una cola derecha muy larga (asimetría y curtosis altas). Esto confirma lo que muestran asimetría y curtosis y motiva evaluar <code class="docutils literal notranslate"><span class="pre">log1p</span></code> en la sección siguiente.</p>
+</div>
+</div>
+</section>
+<section id="ayuda-la-transformacion-logaritmica">
+<h3>¿Ayuda la transformación logarítmica?<a class="headerlink" href="#ayuda-la-transformacion-logaritmica" title="Link to this heading">#</a></h3>
+<p>Se compara la asimetría de cada variable antes y después de aplicar <code class="docutils literal notranslate"><span class="pre">log1p</span></code> (logaritmo de 1 + x, definido en cero). La decisión
+formal se toma en el capítulo 8 con validación cruzada.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cand</span> <span class="o">=</span> <span class="n">resumen_num</span><span class="p">[</span><span class="n">resumen_num</span><span class="p">[</span><span class="s2">"asimetría"</span><span class="p">]</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="n">comparacion</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">"asimetría original"</span><span class="p">:</span> <span class="p">[</span><span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">skew</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cand</span><span class="p">],</span>
+    <span class="s2">"asimetría con log1p"</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">skew</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cand</span><span class="p">]},</span> <span class="n">index</span><span class="o">=</span><span class="n">cand</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">comparacion</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">mejora</span> <span class="o">=</span> <span class="p">(</span><span class="n">comparacion</span><span class="p">[</span><span class="s2">"asimetría con log1p"</span><span class="p">]</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">comparacion</span><span class="p">[</span><span class="s2">"asimetría original"</span><span class="p">]</span><span class="o">.</span><span class="n">abs</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"El logaritmo reduce la asimetría en **</span><span class="si">{</span><span class="n">mejora</span><span class="si">}</span><span class="s2"> de </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cand</span><span class="p">)</span><span class="si">}</span><span class="s2">** variables con |asimetría| &gt; 1."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>asimetría original</th>
+      <th>asimetría con log1p</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>time_in_hospital</th>
+      <td>1.13</td>
+      <td>0.10</td>
+    </tr>
+    <tr>
+      <th>num_procedures</th>
+      <td>1.32</td>
+      <td>0.52</td>
+    </tr>
+    <tr>
+      <th>num_medications</th>
+      <td>1.33</td>
+      <td>-0.48</td>
+    </tr>
+    <tr>
+      <th>number_outpatient</th>
+      <td>8.82</td>
+      <td>2.75</td>
+    </tr>
+    <tr>
+      <th>number_emergency</th>
+      <td>24.19</td>
+      <td>3.69</td>
+    </tr>
+    <tr>
+      <th>number_inpatient</th>
+      <td>3.69</td>
+      <td>1.45</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><p>El logaritmo reduce la asimetría en <strong>6 de 6</strong> variables con |asimetría| &gt; 1.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="variables-categoricas">
+<h2>Variables categóricas<a class="headerlink" href="#variables-categoricas" title="Link to this heading">#</a></h2>
+<p>Se resume, para cada una, cuántos niveles tiene, qué porcentaje falta, cuál es la categoría más frecuente y cuántas categorías son
+raras (menos de 1 % de las filas). Las de alta cardinalidad necesitan un tratamiento especial.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cat_cols</span><span class="p">:</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+    <span class="n">vc</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"variable"</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">"niveles"</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">nunique</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="s2">"faltantes_%"</span><span class="p">:</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">s</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                 <span class="s2">"categoría principal"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">vc</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vc</span><span class="p">)</span> <span class="k">else</span> <span class="s2">"—"</span><span class="p">,</span>
+                 <span class="s2">"principal_%"</span><span class="p">:</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">vc</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">total</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vc</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                 <span class="s2">"categorías &lt; 1 %"</span><span class="p">:</span> <span class="nb">int</span><span class="p">((</span><span class="n">vc</span> <span class="o">/</span> <span class="n">total</span> <span class="o">&lt;</span> <span class="mf">0.01</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())})</span>
+<span class="n">resumen_cat</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"niveles"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">resumen_cat</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"resumen_categoricas.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">resumen_cat</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">alta</span> <span class="o">=</span> <span class="n">resumen_cat</span><span class="p">[</span><span class="n">resumen_cat</span><span class="p">[</span><span class="s2">"niveles"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">30</span><span class="p">][</span><span class="s2">"variable"</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Variables de **alta cardinalidad** (más de 30 niveles): </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'`</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">`'</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">alta</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">alta</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'ninguna'</span><span class="si">}</span><span class="s2">. "</span>
+       <span class="s2">"Los códigos de diagnóstico (`diag_1`, `diag_2`, `diag_3`) tienen cientos de niveles: se agrupan en categorías clínicas "</span>
+       <span class="s2">"(circulatorio, respiratorio, digestivo, diabetes, etc.) siguiendo la clasificación CIE-9. Los identificadores codificados y la "</span>
+       <span class="s2">"especialidad médica se tratan con una categoría «infrecuente» para los niveles raros."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>niveles</th>
+      <th>faltantes_%</th>
+      <th>categoría principal</th>
+      <th>principal_%</th>
+      <th>categorías &lt; 1 %</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>diag_3</td>
+      <td>759</td>
+      <td>1.4</td>
+      <td>250</td>
+      <td>11.5</td>
+      <td>740</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>diag_2</td>
+      <td>721</td>
+      <td>0.4</td>
+      <td>276</td>
+      <td>6.7</td>
+      <td>697</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>diag_1</td>
+      <td>695</td>
+      <td>0.0</td>
+      <td>428</td>
+      <td>6.8</td>
+      <td>673</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>medical_specialty</td>
+      <td>70</td>
+      <td>48.8</td>
+      <td>InternalMedicine</td>
+      <td>28.1</td>
+      <td>55</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>discharge_disposition_id</td>
+      <td>26</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>59.1</td>
+      <td>18</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>admission_source_id</td>
+      <td>17</td>
+      <td>0.0</td>
+      <td>7</td>
+      <td>56.4</td>
+      <td>11</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>payer_code</td>
+      <td>17</td>
+      <td>39.6</td>
+      <td>MC</td>
+      <td>52.9</td>
+      <td>8</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>diag_3_grupo</td>
+      <td>10</td>
+      <td>0.0</td>
+      <td>Circulatorio</td>
+      <td>29.7</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>diag_1_grupo</td>
+      <td>10</td>
+      <td>0.0</td>
+      <td>Circulatorio</td>
+      <td>29.9</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>age</td>
+      <td>10</td>
+      <td>0.0</td>
+      <td>[70-80)</td>
+      <td>25.6</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>diag_2_grupo</td>
+      <td>10</td>
+      <td>0.0</td>
+      <td>Circulatorio</td>
+      <td>31.2</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>weight</td>
+      <td>9</td>
+      <td>96.9</td>
+      <td>[75-100)</td>
+      <td>42.1</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>admission_type_id</td>
+      <td>8</td>
+      <td>0.0</td>
+      <td>1</td>
+      <td>52.9</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>race</td>
+      <td>5</td>
+      <td>2.2</td>
+      <td>Caucasian</td>
+      <td>76.7</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>metformin</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>80.4</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>pioglitazone</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>92.8</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>max_glu_serum</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>No_medido</td>
+      <td>94.8</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>A1Cresult</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>No_medido</td>
+      <td>83.3</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>glyburide-metformin</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>99.3</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>insulin</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>46.5</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>repaglinide</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>98.5</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>miglitol</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>100.0</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>rosiglitazone</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>93.8</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>glyburide</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>89.6</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>nateglinide</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>99.3</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>chlorpropamide</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>99.9</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>glipizide</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>87.5</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>glimepiride</td>
+      <td>4</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>94.9</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>tolazamide</td>
+      <td>3</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>100.0</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>acarbose</td>
+      <td>3</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>99.7</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>metformin-rosiglitazone</td>
+      <td>2</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>100.0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>diabetesMed</td>
+      <td>2</td>
+      <td>0.0</td>
+      <td>Yes</td>
+      <td>77.0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>change</td>
+      <td>2</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>53.7</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>metformin-pioglitazone</td>
+      <td>2</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>100.0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>tolbutamide</td>
+      <td>2</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>100.0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>glimepiride-pioglitazone</td>
+      <td>2</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>100.0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td>acetohexamide</td>
+      <td>2</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>100.0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>37</th>
+      <td>troglitazone</td>
+      <td>2</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>100.0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>38</th>
+      <td>gender</td>
+      <td>2</td>
+      <td>0.0</td>
+      <td>Female</td>
+      <td>53.6</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>39</th>
+      <td>glipizide-metformin</td>
+      <td>2</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>100.0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>40</th>
+      <td>citoglipton</td>
+      <td>1</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>100.0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>41</th>
+      <td>examide</td>
+      <td>1</td>
+      <td>0.0</td>
+      <td>No</td>
+      <td>100.0</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><p>Variables de <strong>alta cardinalidad</strong> (más de 30 niveles): <code class="docutils literal notranslate"><span class="pre">diag_3</span></code>, <code class="docutils literal notranslate"><span class="pre">diag_2</span></code>, <code class="docutils literal notranslate"><span class="pre">diag_1</span></code>, <code class="docutils literal notranslate"><span class="pre">medical_specialty</span></code>. Los códigos de diagnóstico (<code class="docutils literal notranslate"><span class="pre">diag_1</span></code>, <code class="docutils literal notranslate"><span class="pre">diag_2</span></code>, <code class="docutils literal notranslate"><span class="pre">diag_3</span></code>) tienen cientos de niveles: se agrupan en categorías clínicas (circulatorio, respiratorio, digestivo, diabetes, etc.) siguiendo la clasificación CIE-9. Los identificadores codificados y la especialidad médica se tratan con una categoría «infrecuente» para los niveles raros.</p>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">elegidas</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"race"</span><span class="p">,</span> <span class="s2">"gender"</span><span class="p">,</span> <span class="s2">"age"</span><span class="p">,</span> <span class="s2">"admission_type_id"</span><span class="p">,</span> <span class="s2">"discharge_disposition_id"</span><span class="p">,</span> <span class="s2">"admission_source_id"</span><span class="p">,</span>
+                        <span class="s2">"max_glu_serum"</span><span class="p">,</span> <span class="s2">"A1Cresult"</span><span class="p">,</span> <span class="s2">"insulin"</span><span class="p">,</span> <span class="s2">"change"</span><span class="p">,</span> <span class="s2">"diabetesMed"</span><span class="p">,</span> <span class="s2">"diag_1_grupo"</span><span class="p">]</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mi">13</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">elegidas</span><span class="p">):</span>
+    <span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">"object"</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s2">"Missing"</span><span class="p">)</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#4c78a8"</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">c</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"</span><span class="si">% d</span><span class="s2">e encuentros"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">()[</span><span class="nb">len</span><span class="p">(</span><span class="n">elegidas</span><span class="p">):]:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">"off"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">save_figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"04_categoricas_principales.png"</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/0de38a018ee8f56b87cf32b24c309b7c421609fd436ed30df7069ab331c3a9c6.png" src="../_images/0de38a018ee8f56b87cf32b24c309b7c421609fd436ed30df7069ab331c3a9c6.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">top_esp</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="s2">"medical_specialty"</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">"object"</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s2">"Missing"</span><span class="p">)</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">))</span>
+<span class="p">(</span><span class="n">top_esp</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#f58518"</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"medical_specialty: 12 categorías más frecuentes"</span><span class="p">);</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"</span><span class="si">% d</span><span class="s2">e encuentros"</span><span class="p">)</span>
+<span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="s2">"diag_1_grupo"</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">iloc</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#54a24b"</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Diagnóstico principal agrupado (CIE-9)"</span><span class="p">);</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"</span><span class="si">% d</span><span class="s2">e encuentros"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">save_figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"04_especialidad_y_diagnostico.png"</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"`medical_specialty` tiene </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="s1">'medical_specialty'</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> niveles y </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">frame</span><span class="p">[</span><span class="s1">'medical_specialty'</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2"> % de faltantes; "</span>
+       <span class="sa">f</span><span class="s2">"`diag_1` tiene </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="s1">'diag_1'</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> códigos distintos que se reducen a </span><span class="si">{</span><span class="n">frame</span><span class="p">[</span><span class="s1">'diag_1_grupo'</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="si">}</span><span class="s2"> grupos."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/67ed344a7c5f2fc337329927e70080e07e349139da2b1780f6ed9271e26a156b.png" src="../_images/67ed344a7c5f2fc337329927e70080e07e349139da2b1780f6ed9271e26a156b.png" />
+<p><code class="docutils literal notranslate"><span class="pre">medical_specialty</span></code> tiene 70 niveles y 48,8 % de faltantes; <code class="docutils literal notranslate"><span class="pre">diag_1</span></code> tiene 695 códigos distintos que se reducen a 10 grupos.</p>
+</div>
+</div>
+<section id="medicamentos">
+<h3>Medicamentos<a class="headerlink" href="#medicamentos" title="Link to this heading">#</a></h3>
+<p>Son 23 columnas con cuatro valores (<code class="docutils literal notranslate"><span class="pre">No</span></code>, <code class="docutils literal notranslate"><span class="pre">Steady</span></code>, <code class="docutils literal notranslate"><span class="pre">Up</span></code>, <code class="docutils literal notranslate"><span class="pre">Down</span></code>): si el medicamento se administró y si su dosis cambió durante
+la estancia. La mayoría casi nunca se usa.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">meds</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="p">{</span><span class="s2">"No"</span><span class="p">,</span> <span class="s2">"Steady"</span><span class="p">,</span> <span class="s2">"Up"</span><span class="p">,</span> <span class="s2">"Down"</span><span class="p">}</span> <span class="ow">and</span> <span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">uso</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"</span><span class="si">% c</span><span class="s2">on el medicamento (Steady/Up/Down)"</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"No"</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">meds</span><span class="p">],</span>
+                    <span class="s2">"niveles"</span><span class="p">:</span> <span class="p">[</span><span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">meds</span><span class="p">]},</span> <span class="n">index</span><span class="o">=</span><span class="n">meds</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"</span><span class="si">% c</span><span class="s2">on el medicamento (Steady/Up/Down)"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">constantes</span> <span class="o">=</span> <span class="n">uso</span><span class="p">[</span><span class="n">uso</span><span class="p">[</span><span class="s2">"niveles"</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="n">casi</span> <span class="o">=</span> <span class="n">uso</span><span class="p">[(</span><span class="n">uso</span><span class="p">[</span><span class="s2">"</span><span class="si">% c</span><span class="s2">on el medicamento (Steady/Up/Down)"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">uso</span><span class="p">[</span><span class="s2">"niveles"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="n">display</span><span class="p">(</span><span class="n">uso</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- **Constantes** (un solo valor, sin información): </span><span class="si">{</span><span class="n">constantes</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">constantes</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'ninguna'</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="sa">f</span><span class="s2">"- **Casi constantes** (menos de 1 % de uso): </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">casi</span><span class="p">)</span><span class="si">}</span><span class="s2"> medicamentos</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="sa">f</span><span class="s2">"- Los más usados son </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'**</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">** (</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">uso</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s1"> %)'</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nb">enumerate</span><span class="p">(</span><span class="n">uso</span><span class="o">.</span><span class="n">index</span><span class="p">[:</span><span class="mi">3</span><span class="p">]))</span><span class="si">}</span><span class="s2">; el resto tiene poca variación.</span><span class="se">\n\n</span><span class="s2">"</span>
+       <span class="s2">"Las constantes se eliminan; las casi constantes se conservan pero sus niveles raros se agrupan como «infrecuente»."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>% con el medicamento (Steady/Up/Down)</th>
+      <th>niveles</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>insulin</th>
+      <td>53.48</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>metformin</th>
+      <td>19.59</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>glipizide</th>
+      <td>12.48</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>glyburide</th>
+      <td>10.38</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>pioglitazone</th>
+      <td>7.22</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>rosiglitazone</th>
+      <td>6.25</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>glimepiride</th>
+      <td>5.09</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>repaglinide</th>
+      <td>1.55</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>nateglinide</th>
+      <td>0.70</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>glyburide-metformin</th>
+      <td>0.67</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>acarbose</th>
+      <td>0.30</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>chlorpropamide</th>
+      <td>0.09</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>tolazamide</th>
+      <td>0.04</td>
+      <td>3</td>
+    </tr>
+    <tr>
+      <th>miglitol</th>
+      <td>0.03</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <th>tolbutamide</th>
+      <td>0.03</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>glipizide-metformin</th>
+      <td>0.01</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>troglitazone</th>
+      <td>0.00</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>acetohexamide</th>
+      <td>0.00</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>glimepiride-pioglitazone</th>
+      <td>0.00</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>metformin-rosiglitazone</th>
+      <td>0.00</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>metformin-pioglitazone</th>
+      <td>0.00</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <th>examide</th>
+      <td>0.00</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>citoglipton</th>
+      <td>0.00</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><ul class="simple">
+<li><p><strong>Constantes</strong> (un solo valor, sin información): [‘examide’, ‘citoglipton’]</p></li>
+<li><p><strong>Casi constantes</strong> (menos de 1 % de uso): 13 medicamentos</p></li>
+<li><p>Los más usados son <strong>insulin</strong> (53,5 %), <strong>metformin</strong> (19,6 %), <strong>glipizide</strong> (12,5 %); el resto tiene poca variación.</p></li>
+</ul>
+<p>Las constantes se eliminan; las casi constantes se conservan pero sus niveles raros se agrupan como «infrecuente».</p>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./notebooks"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="03_eda_objetivo.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">3. EDA de la variable objetivo: reingreso antes de 30 días</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="05_eda_bivariado.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">5. Análisis bivariado</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#variables-numericas">Variables numéricas</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#siguen-una-distribucion-normal-pruebas-de-normalidad-con-cautela">¿Siguen una distribución normal? (pruebas de normalidad, con cautela)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ayuda-la-transformacion-logaritmica">¿Ayuda la transformación logarítmica?</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#variables-categoricas">Variables categóricas</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#medicamentos">Medicamentos</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Proyecto de Machine Learning — Maestría en Ingeniería Industrial
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

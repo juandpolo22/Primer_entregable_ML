@@ -1,0 +1,947 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>10. Conclusiones, limitaciones y checklist &#8212; Predicción de reingreso hospitalario antes de 30 días</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/10_conclusiones';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="9. Modelo base: línea base trivial y regresión logística" href="09_modelo_base.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="01_introduccion.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Predicción de reingreso hospitalario antes de 30 días - Home"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Predicción de reingreso hospitalario antes de 30 días - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="01_introduccion.html">
+                    1. Introducción: reingreso hospitalario antes de 30 días
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="02_datos.html">2. La base de datos: tamaño, calidad y representatividad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_eda_objetivo.html">3. EDA de la variable objetivo: reingreso antes de 30 días</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_eda_univariado.html">4. Análisis univariado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_eda_bivariado.html">5. Análisis bivariado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_eda_multivariado.html">6. EDA multivariado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_data_leakage.html">7. Auditoría de data leakage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_preprocesamiento.html">8. Preprocesamiento y Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_modelo_base.html">9. Modelo base: línea base trivial y regresión logística</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">10. Conclusiones, limitaciones y checklist</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/notebooks/10_conclusiones.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>10. Conclusiones, limitaciones y checklist</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#resumen-ejecutivo">Resumen ejecutivo</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#respuestas-a-las-preguntas-del-enunciado">Respuestas a las preguntas del enunciado</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#limitaciones">Limitaciones</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#usos-apropiados-y-consideraciones-eticas">Usos apropiados y consideraciones éticas</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#proximos-pasos">Próximos pasos</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#checklist-del-enunciado">Checklist del enunciado</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reproducibilidad-semillas-y-versiones">Reproducibilidad: semillas y versiones</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#referencias">Referencias</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="conclusiones-limitaciones-y-checklist">
+<h1>10. Conclusiones, limitaciones y checklist<a class="headerlink" href="#conclusiones-limitaciones-y-checklist" title="Link to this heading">#</a></h1>
+<p>Este capítulo <strong>lee las tablas generadas en los capítulos anteriores</strong> y resume los hallazgos; las cifras salen de esas tablas, no están escritas a mano.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Markdown</span><span class="p">,</span> <span class="n">display</span>
+
+<span class="n">project_root</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">"_config.yml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">project_root</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">project_root</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">"No se encontró _config.yml. Ejecuta el notebook dentro de la carpeta del libro."</span><span class="p">)</span>
+    <span class="n">project_root</span> <span class="o">=</span> <span class="n">project_root</span><span class="o">.</span><span class="n">parent</span>
+<span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_root</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">_folder</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"tables"</span><span class="p">,</span> <span class="s2">"figures"</span><span class="p">):</span>          <span class="c1"># se crean si no existen</span>
+    <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">_folder</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.project_utils</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">configure_plots</span><span class="p">()</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.max_columns"</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.width"</span><span class="p">,</span> <span class="mi">170</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.max_colwidth"</span><span class="p">,</span> <span class="mi">70</span><span class="p">)</span>
+<span class="n">TABLES</span> <span class="o">=</span> <span class="n">project_root</span> <span class="o">/</span> <span class="s2">"tables"</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">md_out</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">Markdown</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">platform</span>
+<span class="n">res</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"resultados_holdout.csv"</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ic</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"intervalos_bootstrap_logistica.csv"</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">dif</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"diferencias_vs_dummy.csv"</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">audit</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"auditoria_nota_critica.csv"</span><span class="p">)</span>
+<span class="n">pop</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"decision_poblacion.csv"</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">tra</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"decision_transformacion.csv"</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">rank</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"ranking_univariado.csv"</span><span class="p">)</span>
+<span class="n">falt</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"faltantes_por_columna.csv"</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">obj</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"objetivo_distribucion.csv"</span><span class="p">)</span>
+<span class="n">orr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"odds_ratios.csv"</span><span class="p">)</span>
+<span class="n">sub</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"desempeno_subgrupos.csv"</span><span class="p">)</span>
+<span class="n">umb</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"umbral_alternativo.csv"</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">part</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"particion_encuentros.csv"</span><span class="p">)</span>
+<span class="n">lr</span><span class="p">,</span> <span class="n">dm</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">"Regresión logística"</span><span class="p">],</span> <span class="n">res</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">"Dummy (clase mayoritaria)"</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="resumen-ejecutivo">
+<h2>Resumen ejecutivo<a class="headerlink" href="#resumen-ejecutivo" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_train</span><span class="p">,</span> <span class="n">n_test</span> <span class="o">=</span> <span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s2">"conjunto"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"train"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="s2">"conjunto"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"test"</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">md_out</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">"Se construyó una línea base para predecir si un encuentro de un paciente con diabetes terminará en **reingreso antes de 30 días**, "</span>
+    <span class="sa">f</span><span class="s2">"con </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">n_train</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">n_test</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> encuentros y una partición agrupada por paciente (</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">n_train</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> de entrenamiento; </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">n_test</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> de prueba). "</span>
+    <span class="sa">f</span><span class="s2">"En el holdout, la regresión logística obtiene ROC-AUC </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">lr</span><span class="p">[</span><span class="s1">'ROC-AUC'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> "</span>
+    <span class="sa">f</span><span class="s2">"(IC 95 %: </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">ic</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">'ROC-AUC'</span><span class="p">,</span><span class="w"> </span><span class="s1">'IC 95 </span><span class="si">% i</span><span class="s1">nferior'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">–</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">ic</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s1">'ROC-AUC'</span><span class="p">,</span><span class="w"> </span><span class="s1">'IC 95 </span><span class="si">% s</span><span class="s1">uperior'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">) y Average Precision </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">lr</span><span class="p">[</span><span class="s1">'Average Precision'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">. "</span>
+    <span class="sa">f</span><span class="s2">"Con el umbral 0,5, su accuracy es </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">lr</span><span class="p">[</span><span class="s1">'Accuracy'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">, igual a la línea trivial (</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">dm</span><span class="p">[</span><span class="s1">'Accuracy'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">), "</span>
+    <span class="sa">f</span><span class="s2">"pero el recall es apenas </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">lr</span><span class="p">[</span><span class="s1">'Recall'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">. Por tanto, el modelo aporta una señal de ordenamiento modesta, pero el umbral estándar **no es útil para detectar la clase positiva**; "</span>
+    <span class="s2">"cualquier cambio de umbral debe decidirse posteriormente con costos y criterios clínicos definidos, no observando el test."</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<p>Se construyó una línea base para predecir si un encuentro de un paciente con diabetes terminará en <strong>reingreso antes de 30 días</strong>, con 101.766 encuentros y una partición agrupada por paciente (81.413 de entrenamiento; 20.353 de prueba). En el holdout, la regresión logística obtiene ROC-AUC 0,658 (IC 95 %: 0,645–0,671) y Average Precision 0,212. Con el umbral 0,5, su accuracy es 0,883, igual a la línea trivial (0,883), pero el recall es apenas 0,002. Por tanto, el modelo aporta una señal de ordenamiento modesta, pero el umbral estándar <strong>no es útil para detectar la clase positiva</strong>; cualquier cambio de umbral debe decidirse posteriormente con costos y criterios clínicos definidos, no observando el test.</p>
+</div>
+</div>
+</section>
+<section id="respuestas-a-las-preguntas-del-enunciado">
+<h2>Respuestas a las preguntas del enunciado<a class="headerlink" href="#respuestas-a-las-preguntas-del-enunciado" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">top_var</span> <span class="o">=</span> <span class="n">rank</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">faltan</span> <span class="o">=</span> <span class="n">falt</span><span class="p">[</span><span class="s2">"faltantes_%"</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">preg</span> <span class="o">=</span> <span class="p">[</span>
+ <span class="p">(</span><span class="s2">"¿Qué se predice y para qué?"</span><span class="p">,</span> <span class="s2">"Reingreso hospitalario en menos de 30 días; busca apoyar la priorización académica de seguimiento sin convertirse en una decisión clínica automática."</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"¿Cuántos datos hay y cuántos son independientes?"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">n_train</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">n_test</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> encuentros; los pacientes son las entidades independientes y se usaron para partir y validar."</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"¿Qué tan balanceadas están las clases?"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Reingreso &lt;30: </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s1">'%'</span><span class="p">],</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2"> %; clase 0 (&gt;30 o NO): </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s1">'%'</span><span class="p">],</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2"> %."</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"¿Qué problemas de calidad hay?"</span><span class="p">,</span> <span class="s2">"Faltantes altos en "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">` (</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">faltan</span><span class="p">[</span><span class="n">v</span><span class="p">],</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> %)"</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">faltan</span><span class="o">.</span><span class="n">index</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span> <span class="o">+</span> <span class="s2">"; altas terminales; variables constantes."</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"¿Qué variables se asocian más al reingreso?"</span><span class="p">,</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="s1">'variable'</span><span class="p">]</span><span class="si">}</span><span class="s2">` (AUC univariado </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">'AUC univariado'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">top_var</span><span class="o">.</span><span class="n">iterrows</span><span class="p">())</span> <span class="o">+</span> <span class="s2">"."</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"¿Hay fuga de datos?"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"No se detectó ninguna variable que por sí sola reproduzca el objetivo (máximo AUC univariado </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">rank</span><span class="p">[</span><span class="s1">'AUC univariado'</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">). "</span>
+                         <span class="o">+</span> <span class="p">(</span><span class="s2">"Se excluyeron las altas por fallecimiento u hospicio, que no pueden reingresar."</span> <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">pop</span><span class="p">[</span><span class="s1">'excluir_terminales'</span><span class="p">])</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)),</span>
+ <span class="p">(</span><span class="s2">"¿Qué preprocesamiento se aplicó?"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"Pipeline con imputación, `Missing` para categóricas, categorías raras agrupadas, estandarización y </span><span class="si">{</span><span class="s1">'`log1p`'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">bool</span><span class="p">(</span><span class="n">tra</span><span class="p">[</span><span class="s1">'usar_log1p'</span><span class="p">])</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'sin `log1p`'</span><span class="si">}</span><span class="s2"> en conteos."</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"¿Cuánto mejora el modelo sobre la línea base?"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"ROC-AUC </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">lr</span><span class="p">[</span><span class="s1">'ROC-AUC'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> frente a 0,5 y Average Precision </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">lr</span><span class="p">[</span><span class="s1">'Average Precision'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> frente a </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">dm</span><span class="p">[</span><span class="s1">'Average Precision'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">; el accuracy no cambia y el recall con umbral 0,5 es </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">lr</span><span class="p">[</span><span class="s1">'Recall'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">."</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"¿Se activa la nota crítica (accuracy ≥ 80–90 %)?"</span><span class="p">,</span> <span class="s2">"No."</span> <span class="k">if</span> <span class="n">lr</span><span class="p">[</span><span class="s2">"Accuracy"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.80</span> <span class="k">else</span> <span class="s2">"Sí; ver la auditoría del capítulo 9."</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="c1"># Se muestra el texto completo de cada respuesta (sin el recorte de 70 caracteres del resto del libro).</span>
+<span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">option_context</span><span class="p">(</span><span class="s2">"display.max_colwidth"</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">preg</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">"pregunta"</span><span class="p">,</span> <span class="s2">"respuesta"</span><span class="p">]))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>pregunta</th>
+      <th>respuesta</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>¿Qué se predice y para qué?</td>
+      <td>Reingreso hospitalario en menos de 30 días; busca apoyar la priorización académica de seguimiento sin convertirse en una decisión clínica automática.</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>¿Cuántos datos hay y cuántos son independientes?</td>
+      <td>101.766 encuentros; los pacientes son las entidades independientes y se usaron para partir y validar.</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>¿Qué tan balanceadas están las clases?</td>
+      <td>Reingreso &lt;30: 11,1 %; clase 0 (&gt;30 o NO): 88,9 %.</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>¿Qué problemas de calidad hay?</td>
+      <td>Faltantes altos en `weight` (97 %), `medical_specialty` (49 %), `payer_code` (40 %); altas terminales; variables constantes.</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>¿Qué variables se asocian más al reingreso?</td>
+      <td>`number_inpatient` (AUC univariado 0,610), `discharge_disposition_id` (AUC univariado 0,575), `num_medications` (AUC univariado 0,543).</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>¿Hay fuga de datos?</td>
+      <td>No se detectó ninguna variable que por sí sola reproduzca el objetivo (máximo AUC univariado 0,610). Se excluyeron las altas por fallecimiento u hospicio, que no pueden reingresar.</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>¿Qué preprocesamiento se aplicó?</td>
+      <td>Pipeline con imputación, `Missing` para categóricas, categorías raras agrupadas, estandarización y `log1p` en conteos.</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>¿Cuánto mejora el modelo sobre la línea base?</td>
+      <td>ROC-AUC 0,658 frente a 0,5 y Average Precision 0,212 frente a 0,117; el accuracy no cambia y el recall con umbral 0,5 es 0,002.</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>¿Se activa la nota crítica (accuracy ≥ 80–90 %)?</td>
+      <td>Sí; ver la auditoría del capítulo 9.</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+<section id="limitaciones">
+<h2>Limitaciones<a class="headerlink" href="#limitaciones" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rango_sub</span> <span class="o">=</span> <span class="n">sub</span><span class="p">[</span><span class="s2">"AUC"</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">sub</span><span class="p">[</span><span class="s2">"AUC"</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+<span class="n">md_out</span><span class="p">(</span><span class="s2">"- **Observacional y de un solo sistema:** datos de hospitales de EE. UU. entre 1999 y 2008; las asociaciones no son causales y no se extrapolan sin más a otros países ni épocas.</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="s2">"- **Sin fecha por encuentro:** no se pudo estudiar deriva temporal; la partición no es cronológica.</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="s2">"- **Objetivo y seguimiento incompletos:** un reingreso en otro hospital no aparece en los datos.</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="sa">f</span><span class="s2">"- **Poder predictivo </span><span class="si">{</span><span class="s1">'modesto'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">lr</span><span class="p">[</span><span class="s1">'ROC-AUC'</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.75</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'razonable'</span><span class="si">}</span><span class="s2">:** con un AUC de </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">lr</span><span class="p">[</span><span class="s1">'ROC-AUC'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">, el modelo sirve para **priorizar**, no para decidir un caso individual.</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="sa">f</span><span class="s2">"- **Diferencias entre subgrupos:** el AUC varía </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">rango_sub</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> entre subgrupos de sexo, raza y edad; hay que auditarlo antes de cualquier uso.</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="s2">"- **Faltantes:** el mecanismo MNAR no puede descartarse en variables como el peso o la especialidad médica.</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="s2">"- **Línea base lineal:** una regresión logística no captura interacciones ni no linealidades; es el punto de partida, no el techo."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<ul class="simple">
+<li><p><strong>Observacional y de un solo sistema:</strong> datos de hospitales de EE. UU. entre 1999 y 2008; las asociaciones no son causales y no se extrapolan sin más a otros países ni épocas.</p></li>
+<li><p><strong>Sin fecha por encuentro:</strong> no se pudo estudiar deriva temporal; la partición no es cronológica.</p></li>
+<li><p><strong>Objetivo y seguimiento incompletos:</strong> un reingreso en otro hospital no aparece en los datos.</p></li>
+<li><p><strong>Poder predictivo modesto:</strong> con un AUC de 0,658, el modelo sirve para <strong>priorizar</strong>, no para decidir un caso individual.</p></li>
+<li><p><strong>Diferencias entre subgrupos:</strong> el AUC varía 0,091 entre subgrupos de sexo, raza y edad; hay que auditarlo antes de cualquier uso.</p></li>
+<li><p><strong>Faltantes:</strong> el mecanismo MNAR no puede descartarse en variables como el peso o la especialidad médica.</p></li>
+<li><p><strong>Línea base lineal:</strong> una regresión logística no captura interacciones ni no linealidades; es el punto de partida, no el techo.</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="usos-apropiados-y-consideraciones-eticas">
+<h2>Usos apropiados y consideraciones éticas<a class="headerlink" href="#usos-apropiados-y-consideraciones-eticas" title="Link to this heading">#</a></h2>
+<p>Los registros están anonimizados, pero contienen atributos sensibles como raza,
+sexo y edad. El conjunto corresponde a una población hospitalaria específica de
+Estados Unidos entre 1999 y 2008 y puede reflejar desigualdades de acceso,
+prácticas históricas y sesgos de documentación. Un modelo con rendimiento
+distinto entre subgrupos podría distribuir de forma desigual los recursos de
+seguimiento.</p>
+<p>Este trabajo es académico: no está validado externamente, no debe usarse para
+negar atención y no constituye una herramienta clínica. Antes de cualquier uso
+real serían necesarias revisión clínica, validación contemporánea y externa,
+evaluación de sesgo, seguridad, privacidad y monitoreo de calibración.</p>
+</section>
+<section id="proximos-pasos">
+<h2>Próximos pasos<a class="headerlink" href="#proximos-pasos" title="Link to this heading">#</a></h2>
+<p>En una fase posterior se podrían comparar modelos no lineales, revisar umbrales
+según costos acordados con expertos y validar en datos externos. Esas tareas no
+forman parte de este entregable base.</p>
+</section>
+<section id="checklist-del-enunciado">
+<h2>Checklist del enunciado<a class="headerlink" href="#checklist-del-enunciado" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">checklist</span> <span class="o">=</span> <span class="p">[</span>
+ <span class="p">(</span><span class="s2">"Fuente, DOI, licencia, población, periodo y unidad de observación"</span><span class="p">,</span> <span class="s2">"Cap. 1"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"Target &lt;30 consistente"</span><span class="p">,</span> <span class="s2">"Caps. 1, 3, 9 y 10"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"n/p, clases, pacientes y encuentros por paciente"</span><span class="p">,</span> <span class="s2">"Cap. 2"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"Calidad: faltantes, mecanismo prudente, duplicados, outliers e inconsistencias"</span><span class="p">,</span> <span class="s2">"Cap. 2"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"Split 80/20 estratificado y agrupado; cero pacientes compartidos"</span><span class="p">,</span> <span class="s2">"Caps. 1 y 7"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"EDA objetivo, univariado y bivariado con tamaños de efecto/FDR"</span><span class="p">,</span> <span class="s2">"Caps. 3–5"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"Pearson, Spearman, hexbin, χ², V de Cramér e información mutua"</span><span class="p">,</span> <span class="s2">"Caps. 5–6"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"VIF, PCA, varianza explicada e Isolation Forest"</span><span class="p">,</span> <span class="s2">"Cap. 6"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"Auditoría variable por variable y AUC univariado"</span><span class="p">,</span> <span class="s2">"Cap. 7"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"Pipeline/ColumnTransformer sin fuga"</span><span class="p">,</span> <span class="s2">"Cap. 8"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"DummyClassifier y regresión logística"</span><span class="p">,</span> <span class="s2">"Cap. 9"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"Accuracy, precision, recall, F1, ROC-AUC, AP, matrices, ROC y PR"</span><span class="p">,</span> <span class="s2">"Cap. 9"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"Calibración y Brier score"</span><span class="p">,</span> <span class="s2">"Cap. 9"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"Bootstrap por paciente e IC por métrica"</span><span class="p">,</span> <span class="s2">"Cap. 9"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"Curva de aprendizaje agrupada e interpretación de odds ratios"</span><span class="p">,</span> <span class="s2">"Cap. 9"</span><span class="p">),</span>
+ <span class="p">(</span><span class="s2">"Referencias reales, requirements y Jupyter Book reproducible"</span><span class="p">,</span> <span class="s2">"Archivos raíz"</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="n">checklist_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([(</span><span class="s2">"✓"</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">checklist</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">""</span><span class="p">,</span> <span class="s2">"requisito"</span><span class="p">,</span> <span class="s2">"evidencia"</span><span class="p">])</span>
+<span class="n">checklist_table</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"checklist_entregable.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">option_context</span><span class="p">(</span><span class="s2">"display.max_colwidth"</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">checklist_table</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>requisito</th>
+      <th>evidencia</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>✓</td>
+      <td>Fuente, DOI, licencia, población, periodo y unidad de observación</td>
+      <td>Cap. 1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>✓</td>
+      <td>Target &lt;30 consistente</td>
+      <td>Caps. 1, 3, 9 y 10</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>✓</td>
+      <td>n/p, clases, pacientes y encuentros por paciente</td>
+      <td>Cap. 2</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>✓</td>
+      <td>Calidad: faltantes, mecanismo prudente, duplicados, outliers e inconsistencias</td>
+      <td>Cap. 2</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>✓</td>
+      <td>Split 80/20 estratificado y agrupado; cero pacientes compartidos</td>
+      <td>Caps. 1 y 7</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>✓</td>
+      <td>EDA objetivo, univariado y bivariado con tamaños de efecto/FDR</td>
+      <td>Caps. 3–5</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>✓</td>
+      <td>Pearson, Spearman, hexbin, χ², V de Cramér e información mutua</td>
+      <td>Caps. 5–6</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>✓</td>
+      <td>VIF, PCA, varianza explicada e Isolation Forest</td>
+      <td>Cap. 6</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>✓</td>
+      <td>Auditoría variable por variable y AUC univariado</td>
+      <td>Cap. 7</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>✓</td>
+      <td>Pipeline/ColumnTransformer sin fuga</td>
+      <td>Cap. 8</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>✓</td>
+      <td>DummyClassifier y regresión logística</td>
+      <td>Cap. 9</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>✓</td>
+      <td>Accuracy, precision, recall, F1, ROC-AUC, AP, matrices, ROC y PR</td>
+      <td>Cap. 9</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>✓</td>
+      <td>Calibración y Brier score</td>
+      <td>Cap. 9</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>✓</td>
+      <td>Bootstrap por paciente e IC por métrica</td>
+      <td>Cap. 9</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>✓</td>
+      <td>Curva de aprendizaje agrupada e interpretación de odds ratios</td>
+      <td>Cap. 9</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>✓</td>
+      <td>Referencias reales, requirements y Jupyter Book reproducible</td>
+      <td>Archivos raíz</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+<section id="reproducibilidad-semillas-y-versiones">
+<h2>Reproducibilidad: semillas y versiones<a class="headerlink" href="#reproducibilidad-semillas-y-versiones" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sklearn</span><span class="o">,</span><span class="w"> </span><span class="nn">scipy</span><span class="o">,</span><span class="w"> </span><span class="nn">matplotlib</span>
+<span class="n">versiones</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"paquete"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"Python"</span><span class="p">,</span> <span class="s2">"numpy"</span><span class="p">,</span> <span class="s2">"pandas"</span><span class="p">,</span> <span class="s2">"scipy"</span><span class="p">,</span> <span class="s2">"scikit-learn"</span><span class="p">,</span> <span class="s2">"matplotlib"</span><span class="p">,</span> <span class="s2">"seaborn"</span><span class="p">],</span>
+                          <span class="s2">"versión"</span><span class="p">:</span> <span class="p">[</span><span class="n">platform</span><span class="o">.</span><span class="n">python_version</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span> <span class="n">scipy</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span> <span class="n">sns</span><span class="o">.</span><span class="n">__version__</span><span class="p">]})</span>
+<span class="n">display</span><span class="p">(</span><span class="n">versiones</span><span class="p">)</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**Semilla global:** `RANDOM_STATE = </span><span class="si">{</span><span class="n">RANDOM_STATE</span><span class="si">}</span><span class="s2">` (partición, pliegues de validación, bootstrap y muestreos de gráficos). "</span>
+       <span class="sa">f</span><span class="s2">"**Partición:** `tables/particion_encuentros.csv`. **Validación:** `StratifiedGroupKFold` con </span><span class="si">{</span><span class="n">N_SPLITS</span><span class="si">}</span><span class="s2"> pliegues agrupados por `</span><span class="si">{</span><span class="n">GROUP_COL</span><span class="si">}</span><span class="s2">`. "</span>
+       <span class="s2">"Las tablas de resultados están en la carpeta `tables/` y las figuras en `figures/`."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>paquete</th>
+      <th>versión</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Python</td>
+      <td>3.9.25</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>numpy</td>
+      <td>1.23.5</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>pandas</td>
+      <td>2.3.3</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>scipy</td>
+      <td>1.11.2</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>scikit-learn</td>
+      <td>1.3.0</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>matplotlib</td>
+      <td>3.7.2</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>seaborn</td>
+      <td>0.12.2</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><p><strong>Semilla global:</strong> <code class="docutils literal notranslate"><span class="pre">RANDOM_STATE</span> <span class="pre">=</span> <span class="pre">42</span></code> (partición, pliegues de validación, bootstrap y muestreos de gráficos). <strong>Partición:</strong> <code class="docutils literal notranslate"><span class="pre">tables/particion_encuentros.csv</span></code>. <strong>Validación:</strong> <code class="docutils literal notranslate"><span class="pre">StratifiedGroupKFold</span></code> con 5 pliegues agrupados por <code class="docutils literal notranslate"><span class="pre">patient_nbr</span></code>. Las tablas de resultados están en la carpeta <code class="docutils literal notranslate"><span class="pre">tables/</span></code> y las figuras en <code class="docutils literal notranslate"><span class="pre">figures/</span></code>.</p>
+</div>
+</div>
+</section>
+<section id="referencias">
+<h2>Referencias<a class="headerlink" href="#referencias" title="Link to this heading">#</a></h2>
+<div class="docutils container" id="id1">
+<div role="list" class="citation-list">
+<div class="citation" id="id2" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>John Clore, Krzysztof Cios, Jonathan DeShazo, and Beata Strack. Diabetes 130-us hospitals for years 1999–2008. 2014. License: Creative Commons Attribution 4.0 International (CC BY 4.0). URL: <a class="reference external" href="https://archive.ics.uci.edu/dataset/296/diabetes+130-us+hospitals+for+years+1999-2008">https://archive.ics.uci.edu/dataset/296/diabetes+130-us+hospitals+for+years+1999-2008</a>, <a class="reference external" href="https://doi.org/10.24432/C5230J">doi:10.24432/C5230J</a>.</p>
+</div>
+<div class="citation" id="id3" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p>Beata Strack, Jonathan P. DeShazo, Chris Gennings, Juan L. Olmo, Sebastian Ventura, Krzysztof J. Cios, and John N. Clore. Impact of hba1c measurement on hospital readmission rates: analysis of 70,000 clinical database patient records. <em>BioMed Research International</em>, 2014:781670, 2014. URL: <a class="reference external" href="https://doi.org/10.1155/2014/781670">https://doi.org/10.1155/2014/781670</a>, <a class="reference external" href="https://doi.org/10.1155/2014/781670">doi:10.1155/2014/781670</a>.</p>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./notebooks"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="09_modelo_base.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">9. Modelo base: línea base trivial y regresión logística</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#resumen-ejecutivo">Resumen ejecutivo</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#respuestas-a-las-preguntas-del-enunciado">Respuestas a las preguntas del enunciado</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#limitaciones">Limitaciones</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#usos-apropiados-y-consideraciones-eticas">Usos apropiados y consideraciones éticas</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#proximos-pasos">Próximos pasos</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#checklist-del-enunciado">Checklist del enunciado</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reproducibilidad-semillas-y-versiones">Reproducibilidad: semillas y versiones</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#referencias">Referencias</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Proyecto de Machine Learning — Maestría en Ingeniería Industrial
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

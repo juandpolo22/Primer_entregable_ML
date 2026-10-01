@@ -1,0 +1,2011 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>2. La base de datos: tamaño, calidad y representatividad &#8212; Predicción de reingreso hospitalario antes de 30 días</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/02_datos';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="3. EDA de la variable objetivo: reingreso antes de 30 días" href="03_eda_objetivo.html" />
+    <link rel="prev" title="1. Introducción: reingreso hospitalario antes de 30 días" href="01_introduccion.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="01_introduccion.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Predicción de reingreso hospitalario antes de 30 días - Home"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Predicción de reingreso hospitalario antes de 30 días - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="01_introduccion.html">
+                    1. Introducción: reingreso hospitalario antes de 30 días
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">2. La base de datos: tamaño, calidad y representatividad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_eda_objetivo.html">3. EDA de la variable objetivo: reingreso antes de 30 días</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_eda_univariado.html">4. Análisis univariado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_eda_bivariado.html">5. Análisis bivariado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_eda_multivariado.html">6. EDA multivariado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_data_leakage.html">7. Auditoría de data leakage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_preprocesamiento.html">8. Preprocesamiento y Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_modelo_base.html">9. Modelo base: línea base trivial y regresión logística</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10_conclusiones.html">10. Conclusiones, limitaciones y checklist</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/notebooks/02_datos.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>2. La base de datos: tamaño, calidad y representatividad</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#diccionario-de-datos">Diccionario de datos</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tamano-de-la-muestra">Tamaño de la muestra</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#valores-faltantes-patron">Valores faltantes: patrón</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#valores-faltantes-mecanismo-mcar-mar-o-mnar">Valores faltantes: mecanismo (MCAR, MAR o MNAR)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plan-de-tratamiento-de-los-faltantes">Plan de tratamiento de los faltantes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#duplicados-y-casi-duplicados">Duplicados y casi-duplicados</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#valores-atipicos">Valores atípicos</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#valores-imposibles-o-inconsistentes">Valores imposibles o inconsistentes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sesgos-de-muestreo-y-representatividad">Sesgos de muestreo y representatividad</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consideraciones-eticas">Consideraciones éticas</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="la-base-de-datos-tamano-calidad-y-representatividad">
+<h1>2. La base de datos: tamaño, calidad y representatividad<a class="headerlink" href="#la-base-de-datos-tamano-calidad-y-representatividad" title="Link to this heading">#</a></h1>
+<p>Este capítulo caracteriza los datos <strong>de entrenamiento</strong> antes de analizarlos: tamaño, casos por clase, entidades
+independientes, valores faltantes (patrón y mecanismo), duplicados, valores atípicos e inconsistentes, sesgos de muestreo y ética.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Markdown</span><span class="p">,</span> <span class="n">display</span>
+
+<span class="n">project_root</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">"_config.yml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">project_root</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">project_root</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">"No se encontró _config.yml. Ejecuta el notebook dentro de la carpeta del libro."</span><span class="p">)</span>
+    <span class="n">project_root</span> <span class="o">=</span> <span class="n">project_root</span><span class="o">.</span><span class="n">parent</span>
+<span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_root</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">_folder</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"tables"</span><span class="p">,</span> <span class="s2">"figures"</span><span class="p">):</span>          <span class="c1"># se crean si no existen</span>
+    <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">_folder</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.project_utils</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">configure_plots</span><span class="p">()</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.max_columns"</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.width"</span><span class="p">,</span> <span class="mi">170</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.max_colwidth"</span><span class="p">,</span> <span class="mi">70</span><span class="p">)</span>
+<span class="n">TABLES</span> <span class="o">=</span> <span class="n">project_root</span> <span class="o">/</span> <span class="s2">"tables"</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">md_out</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">Markdown</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="diccionario-de-datos">
+<h2>Diccionario de datos<a class="headerlink" href="#diccionario-de-datos" title="Link to this heading">#</a></h2>
+<p>La tabla contiene una fila por variable con tipo observado, significado
+documentado, unidad o naturaleza del código, valores/categorías, cantidad de
+faltantes y papel dentro del análisis. Los identificadores y objetivos se
+distinguen explícitamente de las predictoras. Cuando una variable no tiene
+unidad física se reporta <code class="docutils literal notranslate"><span class="pre">no</span> <span class="pre">aplica</span></code>, <code class="docutils literal notranslate"><span class="pre">código</span></code> o <code class="docutils literal notranslate"><span class="pre">conteo</span></code>, sin inventar unidades.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">train</span> <span class="o">=</span> <span class="n">load_train</span><span class="p">()</span>
+<span class="n">dic</span> <span class="o">=</span> <span class="n">build_dictionary</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="n">dic</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"diccionario_datos.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">dic</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>tipo</th>
+      <th>significado</th>
+      <th>unidad</th>
+      <th>valores_o_categorías</th>
+      <th>faltantes</th>
+      <th>faltantes_%</th>
+      <th>papel</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>encounter_id</td>
+      <td>identificador</td>
+      <td>Identificador único del encuentro</td>
+      <td>no aplica</td>
+      <td>rango observado: 12522 a 443867222</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>identificador; excluido del modelo</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>patient_nbr</td>
+      <td>entidad</td>
+      <td>Identificador del paciente (varios encuentros por paciente)</td>
+      <td>no aplica</td>
+      <td>rango observado: 378 a 189481478</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>grupo de paciente; excluido del modelo</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>race</td>
+      <td>categórica nominal</td>
+      <td>Raza reportada</td>
+      <td>no aplica</td>
+      <td>AfricanAmerican, Asian, Caucasian, Hispanic, Other</td>
+      <td>1798</td>
+      <td>2.21</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>gender</td>
+      <td>categórica nominal</td>
+      <td>Sexo</td>
+      <td>no aplica</td>
+      <td>Female, Male</td>
+      <td>2</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>age</td>
+      <td>categórica ordinal</td>
+      <td>Rango de edad en décadas</td>
+      <td>años (rangos de 10 años)</td>
+      <td>[0-10), [10-20), [20-30), [30-40), [40-50), [50-60), [60-70), [70-...</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>weight</td>
+      <td>categórica ordinal</td>
+      <td>Peso en libras (rangos)</td>
+      <td>libras (rangos)</td>
+      <td>&gt;200, [0-25), [100-125), [125-150), [150-175), [175-200), [25-50),...</td>
+      <td>78886</td>
+      <td>96.90</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>admission_type_id</td>
+      <td>categórica codificada</td>
+      <td>Tipo de ingreso (urgencia, electivo...)</td>
+      <td>código</td>
+      <td>1, 2, 3, 4, 5, 6, 7, 8</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>discharge_disposition_id</td>
+      <td>categórica codificada</td>
+      <td>Destino al alta (casa, traslado, fallecimiento...)</td>
+      <td>código</td>
+      <td>rango observado: 1 a 28</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>admission_source_id</td>
+      <td>categórica codificada</td>
+      <td>Origen del ingreso (remisión, urgencias...)</td>
+      <td>código</td>
+      <td>rango observado: 1 a 25</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>time_in_hospital</td>
+      <td>numérica discreta</td>
+      <td>Días de hospitalización (1 a 14)</td>
+      <td>días</td>
+      <td>rango observado: 1 a 14</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>payer_code</td>
+      <td>categórica nominal</td>
+      <td>Aseguradora / pagador</td>
+      <td>no aplica</td>
+      <td>17 categorías; consultar documentación UCI</td>
+      <td>32251</td>
+      <td>39.61</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>medical_specialty</td>
+      <td>categórica nominal</td>
+      <td>Especialidad del médico que admite</td>
+      <td>no aplica</td>
+      <td>70 categorías; consultar documentación UCI</td>
+      <td>39769</td>
+      <td>48.85</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>num_lab_procedures</td>
+      <td>numérica discreta</td>
+      <td>Número de pruebas de laboratorio</td>
+      <td>conteo</td>
+      <td>rango observado: 1 a 132</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>num_procedures</td>
+      <td>numérica discreta</td>
+      <td>Número de procedimientos (sin laboratorio)</td>
+      <td>conteo</td>
+      <td>0, 1, 2, 3, 4, 5, 6</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>num_medications</td>
+      <td>numérica discreta</td>
+      <td>Número de medicamentos distintos administrados</td>
+      <td>conteo</td>
+      <td>rango observado: 1 a 81</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>number_outpatient</td>
+      <td>numérica discreta</td>
+      <td>Visitas ambulatorias el año previo</td>
+      <td>conteo</td>
+      <td>rango observado: 0 a 42</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>number_emergency</td>
+      <td>numérica discreta</td>
+      <td>Visitas a urgencias el año previo</td>
+      <td>conteo</td>
+      <td>rango observado: 0 a 76</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>number_inpatient</td>
+      <td>numérica discreta</td>
+      <td>Hospitalizaciones el año previo</td>
+      <td>conteo</td>
+      <td>rango observado: 0 a 21</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>diag_1</td>
+      <td>categórica de alta cardinalidad</td>
+      <td>Diagnóstico principal (código CIE-9)</td>
+      <td>código</td>
+      <td>695 categorías; consultar documentación UCI</td>
+      <td>16</td>
+      <td>0.02</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>diag_2</td>
+      <td>categórica de alta cardinalidad</td>
+      <td>Diagnóstico secundario (código CIE-9)</td>
+      <td>código</td>
+      <td>721 categorías; consultar documentación UCI</td>
+      <td>295</td>
+      <td>0.36</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>20</th>
+      <td>diag_3</td>
+      <td>categórica de alta cardinalidad</td>
+      <td>Diagnóstico secundario adicional (código CIE-9)</td>
+      <td>código</td>
+      <td>759 categorías; consultar documentación UCI</td>
+      <td>1157</td>
+      <td>1.42</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>21</th>
+      <td>number_diagnoses</td>
+      <td>numérica discreta</td>
+      <td>Número de diagnósticos registrados</td>
+      <td>conteo</td>
+      <td>rango observado: 1 a 16</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>22</th>
+      <td>max_glu_serum</td>
+      <td>categórica ordinal</td>
+      <td>Resultado de glucosa sérica (No_medido = no realizada)</td>
+      <td>no aplica</td>
+      <td>&gt;200, &gt;300, No_medido, Norm</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>A1Cresult</td>
+      <td>categórica ordinal</td>
+      <td>Resultado de hemoglobina A1c (No_medido = no realizada)</td>
+      <td>no aplica</td>
+      <td>&gt;7, &gt;8, No_medido, Norm</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>metformin</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «metformin»: dosis durante la estancia (No, Steady, Up...</td>
+      <td>no aplica</td>
+      <td>Down, No, Steady, Up</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>25</th>
+      <td>repaglinide</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «repaglinide»: dosis durante la estancia (No, Steady, ...</td>
+      <td>no aplica</td>
+      <td>Down, No, Steady, Up</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>26</th>
+      <td>nateglinide</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «nateglinide»: dosis durante la estancia (No, Steady, ...</td>
+      <td>no aplica</td>
+      <td>Down, No, Steady, Up</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>27</th>
+      <td>chlorpropamide</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «chlorpropamide»: dosis durante la estancia (No, Stead...</td>
+      <td>no aplica</td>
+      <td>Down, No, Steady, Up</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>28</th>
+      <td>glimepiride</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «glimepiride»: dosis durante la estancia (No, Steady, ...</td>
+      <td>no aplica</td>
+      <td>Down, No, Steady, Up</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>29</th>
+      <td>acetohexamide</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «acetohexamide»: dosis durante la estancia (No, Steady...</td>
+      <td>no aplica</td>
+      <td>No, Steady</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>glipizide</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «glipizide»: dosis durante la estancia (No, Steady, Up...</td>
+      <td>no aplica</td>
+      <td>Down, No, Steady, Up</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>31</th>
+      <td>glyburide</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «glyburide»: dosis durante la estancia (No, Steady, Up...</td>
+      <td>no aplica</td>
+      <td>Down, No, Steady, Up</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>32</th>
+      <td>tolbutamide</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «tolbutamide»: dosis durante la estancia (No, Steady, ...</td>
+      <td>no aplica</td>
+      <td>No, Steady</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>33</th>
+      <td>pioglitazone</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «pioglitazone»: dosis durante la estancia (No, Steady,...</td>
+      <td>no aplica</td>
+      <td>Down, No, Steady, Up</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>rosiglitazone</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «rosiglitazone»: dosis durante la estancia (No, Steady...</td>
+      <td>no aplica</td>
+      <td>Down, No, Steady, Up</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>35</th>
+      <td>acarbose</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «acarbose»: dosis durante la estancia (No, Steady, Up,...</td>
+      <td>no aplica</td>
+      <td>No, Steady, Up</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td>miglitol</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «miglitol»: dosis durante la estancia (No, Steady, Up,...</td>
+      <td>no aplica</td>
+      <td>Down, No, Steady, Up</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>37</th>
+      <td>troglitazone</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «troglitazone»: dosis durante la estancia (No, Steady,...</td>
+      <td>no aplica</td>
+      <td>No, Steady</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>38</th>
+      <td>tolazamide</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «tolazamide»: dosis durante la estancia (No, Steady, U...</td>
+      <td>no aplica</td>
+      <td>No, Steady, Up</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>39</th>
+      <td>examide</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «examide»: dosis durante la estancia (No, Steady, Up, ...</td>
+      <td>no aplica</td>
+      <td>No</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>40</th>
+      <td>citoglipton</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «citoglipton»: dosis durante la estancia (No, Steady, ...</td>
+      <td>no aplica</td>
+      <td>No</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>41</th>
+      <td>insulin</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «insulin»: dosis durante la estancia (No, Steady, Up, ...</td>
+      <td>no aplica</td>
+      <td>Down, No, Steady, Up</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>42</th>
+      <td>glyburide-metformin</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «glyburide-metformin»: dosis durante la estancia (No, ...</td>
+      <td>no aplica</td>
+      <td>Down, No, Steady, Up</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>43</th>
+      <td>glipizide-metformin</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «glipizide-metformin»: dosis durante la estancia (No, ...</td>
+      <td>no aplica</td>
+      <td>No, Steady</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>44</th>
+      <td>glimepiride-pioglitazone</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «glimepiride-pioglitazone»: dosis durante la estancia ...</td>
+      <td>no aplica</td>
+      <td>No, Steady</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>45</th>
+      <td>metformin-rosiglitazone</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «metformin-rosiglitazone»: dosis durante la estancia (...</td>
+      <td>no aplica</td>
+      <td>No, Steady</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>46</th>
+      <td>metformin-pioglitazone</td>
+      <td>categórica ordinal</td>
+      <td>Medicamento «metformin-pioglitazone»: dosis durante la estancia (N...</td>
+      <td>no aplica</td>
+      <td>No, Steady</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>47</th>
+      <td>change</td>
+      <td>categórica binaria</td>
+      <td>¿Hubo cambio de medicación?</td>
+      <td>no aplica</td>
+      <td>Ch, No</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>48</th>
+      <td>diabetesMed</td>
+      <td>categórica binaria</td>
+      <td>¿Se recetó medicación para la diabetes?</td>
+      <td>no aplica</td>
+      <td>No, Yes</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>predictora candidata</td>
+    </tr>
+    <tr>
+      <th>49</th>
+      <td>readmitted</td>
+      <td>objetivo original</td>
+      <td>Reingreso: NO, &gt;30 o &lt;30 días</td>
+      <td>no aplica</td>
+      <td>&lt;30, &gt;30, NO</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>objetivo original; excluido del modelo</td>
+    </tr>
+    <tr>
+      <th>50</th>
+      <td>reingreso_30d</td>
+      <td>objetivo derivado</td>
+      <td>Objetivo binario: 1 si hubo reingreso en menos de 30 días; 0 si fu...</td>
+      <td>no aplica</td>
+      <td>0, 1</td>
+      <td>0</td>
+      <td>0.00</td>
+      <td>variable objetivo</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+<section id="tamano-de-la-muestra">
+<h2>Tamaño de la muestra<a class="headerlink" href="#tamano-de-la-muestra" title="Link to this heading">#</a></h2>
+<p>El enunciado pide reportar el número de observaciones, de variables y su relación n/p, los casos por clase y el número de
+<strong>entidades independientes</strong>, porque el tamaño efectivo puede ser menor que el número de filas.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">frame</span> <span class="o">=</span> <span class="n">prepare_frame</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="n">num_cols</span><span class="p">,</span> <span class="n">cat_cols</span> <span class="o">=</span> <span class="n">column_types</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="n">p_predictoras</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">train</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">RAW_TARGET</span><span class="p">,</span> <span class="n">TARGET</span><span class="p">,</span> <span class="n">ID_COL</span><span class="p">,</span> <span class="n">GROUP_COL</span><span class="p">)])</span>
+<span class="n">por_paciente</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">GROUP_COL</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+<span class="n">counts</span> <span class="o">=</span> <span class="n">train</span><span class="p">[</span><span class="n">TARGET</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+<span class="n">raw_counts</span> <span class="o">=</span> <span class="n">train</span><span class="p">[</span><span class="n">RAW_TARGET</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- **Encuentros en entrenamiento:** </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="sa">f</span><span class="s2">"- **Variables predictoras originales:** </span><span class="si">{</span><span class="n">p_predictoras</span><span class="si">}</span><span class="s2"> → relación n/p = </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">p_predictoras</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="sa">f</span><span class="s2">"- **Casos por clase (objetivo binario):** sin reingreso &lt;30 = </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">, con reingreso &lt;30 = </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="sa">f</span><span class="s2">"- **Casos por clase (objetivo original):** "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">raw_counts</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="sa">f</span><span class="s2">"- **Entidades independientes (pacientes):** </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">por_paciente</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> — **</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">por_paciente</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">),</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">pct</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="si">}</span><span class="s2">** del número de encuentros"</span><span class="p">)</span>
+<span class="n">dist</span> <span class="o">=</span> <span class="n">por_paciente</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">upper</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename_axis</span><span class="p">(</span><span class="s2">"encuentros_por_paciente"</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"pacientes"</span><span class="p">)</span>
+<span class="n">dist</span><span class="p">[</span><span class="s2">"encuentros_por_paciente"</span><span class="p">]</span> <span class="o">=</span> <span class="n">dist</span><span class="p">[</span><span class="s2">"encuentros_por_paciente"</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">({</span><span class="s2">"5"</span><span class="p">:</span> <span class="s2">"5 o más"</span><span class="p">})</span>
+<span class="n">dist</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<ul class="simple">
+<li><p><strong>Encuentros en entrenamiento:</strong> 81.413</p></li>
+<li><p><strong>Variables predictoras originales:</strong> 47 → relación n/p = 1.732</p></li>
+<li><p><strong>Casos por clase (objetivo binario):</strong> sin reingreso &lt;30 = 72.390, con reingreso &lt;30 = 9.023</p></li>
+<li><p><strong>Casos por clase (objetivo original):</strong> NO = 43.911, &gt;30 = 28.479, &lt;30 = 9.023</p></li>
+<li><p><strong>Entidades independientes (pacientes):</strong> 57.231 — <strong>70,3 %</strong> del número de encuentros</p></li>
+</ul>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>encuentros_por_paciente</th>
+      <th>pacientes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>43867</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>8302</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>2650</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4</td>
+      <td>1122</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5 o más</td>
+      <td>1290</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p><strong>Interpretación.</strong> El tamaño efectivo de la muestra está entre el número de pacientes y el de encuentros: los encuentros de un mismo
+paciente no son independientes. Por eso las validaciones usan grupos por paciente y el bootstrap del capítulo 9 remuestrea pacientes,
+no filas.</p>
+</section>
+<section id="valores-faltantes-patron">
+<h2>Valores faltantes: patrón<a class="headerlink" href="#valores-faltantes-patron" title="Link to this heading">#</a></h2>
+<p>En el archivo original los faltantes están marcados con <code class="docutils literal notranslate"><span class="pre">?</span></code>. Se muestra el porcentaje por columna y el patrón entre filas y columnas.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">miss</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">to_frame</span><span class="p">(</span><span class="s2">"faltantes"</span><span class="p">)</span>
+<span class="n">miss</span><span class="p">[</span><span class="s2">"faltantes_%"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">miss</span><span class="p">[</span><span class="s2">"faltantes"</span><span class="p">]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="n">miss</span> <span class="o">=</span> <span class="n">miss</span><span class="p">[</span><span class="n">miss</span><span class="p">[</span><span class="s2">"faltantes"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"faltantes_%"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">miss</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"faltantes_por_columna.csv"</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">miss</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">),</span> <span class="n">gridspec_kw</span><span class="o">=</span><span class="p">{</span><span class="s2">"width_ratios"</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">]})</span>
+<span class="n">miss</span><span class="p">[</span><span class="s2">"faltantes_%"</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#4c78a8"</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">();</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"</span><span class="si">% d</span><span class="s2">e filas con faltante"</span><span class="p">);</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Faltantes por columna"</span><span class="p">)</span>
+<span class="n">muestra</span> <span class="o">=</span> <span class="n">train</span><span class="p">[</span><span class="n">miss</span><span class="o">.</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="mi">1500</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">)),</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">muestra</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">cbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">xticklabels</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Patrón de faltantes (1.500 encuentros al azar; oscuro = falta)"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">save_figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"02_faltantes.png"</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>faltantes</th>
+      <th>faltantes_%</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>weight</th>
+      <td>78886</td>
+      <td>96.90</td>
+    </tr>
+    <tr>
+      <th>medical_specialty</th>
+      <td>39769</td>
+      <td>48.85</td>
+    </tr>
+    <tr>
+      <th>payer_code</th>
+      <td>32251</td>
+      <td>39.61</td>
+    </tr>
+    <tr>
+      <th>race</th>
+      <td>1798</td>
+      <td>2.21</td>
+    </tr>
+    <tr>
+      <th>diag_3</th>
+      <td>1157</td>
+      <td>1.42</td>
+    </tr>
+    <tr>
+      <th>diag_2</th>
+      <td>295</td>
+      <td>0.36</td>
+    </tr>
+    <tr>
+      <th>diag_1</th>
+      <td>16</td>
+      <td>0.02</td>
+    </tr>
+    <tr>
+      <th>gender</th>
+      <td>2</td>
+      <td>0.00</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><img alt="../_images/aeeb358ff0fbfa59b9c33f9ca80241463a2371fdfcd6274e1a350d6e78c539ad.png" src="../_images/aeeb358ff0fbfa59b9c33f9ca80241463a2371fdfcd6274e1a350d6e78c539ad.png" />
+</div>
+</div>
+</section>
+<section id="valores-faltantes-mecanismo-mcar-mar-o-mnar">
+<h2>Valores faltantes: mecanismo (MCAR, MAR o MNAR)<a class="headerlink" href="#valores-faltantes-mecanismo-mcar-mar-o-mnar" title="Link to this heading">#</a></h2>
+<p>MCAR implica que la ausencia no se relaciona con variables observadas ni no
+observadas; MAR permite dependencia de información observada; MNAR supone
+dependencia del propio valor no observado u otra información no disponible.
+Los datos no permiten demostrar ninguno de estos mecanismos de manera
+definitiva.</p>
+<p>Como diagnóstico, cada indicador de ausencia se asocia con variables observadas
+mediante Mann–Whitney o V de Cramér y se aplica FDR. Con una muestra grande no
+se interpretan únicamente los p-values: se prioriza la magnitud del efecto.</p>
+<p><strong>Alcance del diagnóstico.</strong> El mecanismo de ausencia se sustenta únicamente con estas asociaciones (Mann–Whitney / V de Cramér) y la corrección FDR de Benjamini–Hochberg; <strong>no se aplicó la prueba MCAR de Little</strong>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">screen</span> <span class="o">=</span> <span class="n">missingness_screen</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">train</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"diag_"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">c</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"_grupo"</span><span class="p">)]))</span>
+<span class="n">screen</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"asociacion_faltantes.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">n_tests</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">screen</span><span class="p">)</span>
+<span class="n">sig</span> <span class="o">=</span> <span class="n">screen</span><span class="p">[</span><span class="n">screen</span><span class="p">[</span><span class="s2">"p_fdr"</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">]</span>
+<span class="n">fuertes</span> <span class="o">=</span> <span class="n">screen</span><span class="p">[</span><span class="n">screen</span><span class="p">[</span><span class="s2">"efecto"</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.10</span><span class="p">]</span>
+<span class="n">display</span><span class="p">(</span><span class="n">screen</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Se hicieron **</span><span class="si">{</span><span class="n">n_tests</span><span class="si">}</span><span class="s2">** comparaciones; **</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sig</span><span class="p">)</span><span class="si">}</span><span class="s2">** son significativas tras la corrección (FDR &lt; 0,05) y "</span>
+       <span class="sa">f</span><span class="s2">"**</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">fuertes</span><span class="p">)</span><span class="si">}</span><span class="s2">** tienen un efecto de al menos 0,10 (asociación no despreciable)."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable_con_faltantes</th>
+      <th>comparada_con</th>
+      <th>tipo</th>
+      <th>efecto</th>
+      <th>p_valor</th>
+      <th>p_fdr</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>diag_3</td>
+      <td>number_diagnoses</td>
+      <td>numérica (|rank-biserial|)</td>
+      <td>0.9547</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>diag_3</td>
+      <td>num_medications</td>
+      <td>numérica (|rank-biserial|)</td>
+      <td>0.5367</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>diag_3</td>
+      <td>time_in_hospital</td>
+      <td>numérica (|rank-biserial|)</td>
+      <td>0.3627</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>diag_3</td>
+      <td>age</td>
+      <td>categórica (V de Cramér)</td>
+      <td>0.3155</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>weight</td>
+      <td>num_lab_procedures</td>
+      <td>numérica (|rank-biserial|)</td>
+      <td>0.3093</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>medical_specialty</td>
+      <td>admission_type_id</td>
+      <td>categórica (V de Cramér)</td>
+      <td>0.3011</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>payer_code</td>
+      <td>admission_type_id</td>
+      <td>categórica (V de Cramér)</td>
+      <td>0.2997</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>payer_code</td>
+      <td>discharge_disposition_id</td>
+      <td>categórica (V de Cramér)</td>
+      <td>0.2951</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>weight</td>
+      <td>number_outpatient</td>
+      <td>numérica (|rank-biserial|)</td>
+      <td>0.2793</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>payer_code</td>
+      <td>admission_source_id</td>
+      <td>categórica (V de Cramér)</td>
+      <td>0.2748</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>diag_3</td>
+      <td>num_procedures</td>
+      <td>numérica (|rank-biserial|)</td>
+      <td>0.2481</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>medical_specialty</td>
+      <td>payer_code</td>
+      <td>categórica (V de Cramér)</td>
+      <td>0.2279</td>
+      <td>0.0</td>
+      <td>0.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><p>Se hicieron <strong>217</strong> comparaciones; <strong>130</strong> son significativas tras la corrección (FDR &lt; 0,05) y <strong>29</strong> tienen un efecto de al menos 0,10 (asociación no despreciable).</p>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">por_var</span> <span class="o">=</span> <span class="p">(</span><span class="n">screen</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"variable_con_faltantes"</span><span class="p">)</span>
+           <span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">max_efecto</span><span class="o">=</span><span class="p">(</span><span class="s2">"efecto"</span><span class="p">,</span> <span class="s2">"max"</span><span class="p">),</span> <span class="n">significativas</span><span class="o">=</span><span class="p">(</span><span class="s2">"p_fdr"</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="nb">int</span><span class="p">((</span><span class="n">s</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())),</span> <span class="n">comparaciones</span><span class="o">=</span><span class="p">(</span><span class="s2">"efecto"</span><span class="p">,</span> <span class="s2">"size"</span><span class="p">))</span>
+           <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"max_efecto"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<span class="n">tasa</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">por_var</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+    <span class="n">tasa</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"variable"</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span> <span class="s2">"reingreso_30d_</span><span class="si">% c</span><span class="s2">on dato"</span><span class="p">:</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">train</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train</span><span class="p">[</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">(),</span> <span class="n">TARGET</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                 <span class="s2">"reingreso_30d_</span><span class="si">% s</span><span class="s2">in dato"</span><span class="p">:</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">train</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">train</span><span class="p">[</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">(),</span> <span class="n">TARGET</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                 <span class="s2">"faltantes_%"</span><span class="p">:</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">train</span><span class="p">[</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()})</span>
+<span class="n">por_var</span> <span class="o">=</span> <span class="n">por_var</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">tasa</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">"variable"</span><span class="p">))</span>
+<span class="n">display</span><span class="p">(</span><span class="n">por_var</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="n">lineas</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">fila</span> <span class="ow">in</span> <span class="n">por_var</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">fila</span><span class="p">[</span><span class="s2">"max_efecto"</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.10</span><span class="p">:</span>
+        <span class="n">lineas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- **</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">**: la ausencia presenta asociación observable (efecto máximo </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">fila</span><span class="p">[</span><span class="s1">'max_efecto'</span><span class="p">],</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">), evidencia incompatible con una afirmación simple de MCAR."</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">fila</span><span class="p">[</span><span class="s2">"significativas"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">lineas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- **</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">**: hay asociaciones significativas pequeñas (efecto máximo </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">fila</span><span class="p">[</span><span class="s1">'max_efecto'</span><span class="p">],</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">); la muestra grande puede detectar diferencias de escasa relevancia práctica."</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lineas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- **</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">**: no se detectó asociación con las variables evaluadas; esto no prueba MCAR."</span><span class="p">)</span>
+<span class="n">md_out</span><span class="p">(</span><span class="s2">"**Lectura prudente:**</span><span class="se">\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lineas</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n\n</span><span class="s2">"</span>
+       <span class="s2">"Los patrones son compatibles con dependencia de variables observadas en algunos casos, pero no permiten distinguir de manera concluyente MAR de MNAR. La ausencia se conserva como categoría cuando corresponde."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>max_efecto</th>
+      <th>significativas</th>
+      <th>comparaciones</th>
+      <th>reingreso_30d_% con dato</th>
+      <th>reingreso_30d_% sin dato</th>
+      <th>faltantes_%</th>
+    </tr>
+    <tr>
+      <th>variable_con_faltantes</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>diag_3</th>
+      <td>0.955</td>
+      <td>22</td>
+      <td>44</td>
+      <td>11.143</td>
+      <td>6.914</td>
+      <td>1.421</td>
+    </tr>
+    <tr>
+      <th>weight</th>
+      <td>0.309</td>
+      <td>24</td>
+      <td>43</td>
+      <td>11.001</td>
+      <td>11.086</td>
+      <td>96.896</td>
+    </tr>
+    <tr>
+      <th>medical_specialty</th>
+      <td>0.301</td>
+      <td>30</td>
+      <td>44</td>
+      <td>10.719</td>
+      <td>11.464</td>
+      <td>48.848</td>
+    </tr>
+    <tr>
+      <th>payer_code</th>
+      <td>0.300</td>
+      <td>32</td>
+      <td>43</td>
+      <td>10.858</td>
+      <td>11.426</td>
+      <td>39.614</td>
+    </tr>
+    <tr>
+      <th>race</th>
+      <td>0.218</td>
+      <td>22</td>
+      <td>43</td>
+      <td>11.156</td>
+      <td>7.842</td>
+      <td>2.208</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><p><strong>Lectura prudente:</strong></p>
+<ul class="simple">
+<li><p><strong>diag_3</strong>: la ausencia presenta asociación observable (efecto máximo 0,95), evidencia incompatible con una afirmación simple de MCAR.</p></li>
+<li><p><strong>weight</strong>: la ausencia presenta asociación observable (efecto máximo 0,31), evidencia incompatible con una afirmación simple de MCAR.</p></li>
+<li><p><strong>medical_specialty</strong>: la ausencia presenta asociación observable (efecto máximo 0,30), evidencia incompatible con una afirmación simple de MCAR.</p></li>
+<li><p><strong>payer_code</strong>: la ausencia presenta asociación observable (efecto máximo 0,30), evidencia incompatible con una afirmación simple de MCAR.</p></li>
+<li><p><strong>race</strong>: la ausencia presenta asociación observable (efecto máximo 0,22), evidencia incompatible con una afirmación simple de MCAR.</p></li>
+</ul>
+<p>Los patrones son compatibles con dependencia de variables observadas en algunos casos, pero no permiten distinguir de manera concluyente MAR de MNAR. La ausencia se conserva como categoría cuando corresponde.</p>
+</div>
+</div>
+<section id="plan-de-tratamiento-de-los-faltantes">
+<h3>Plan de tratamiento de los faltantes<a class="headerlink" href="#plan-de-tratamiento-de-los-faltantes" title="Link to this heading">#</a></h3>
+<p>El <strong>70 % no es una regla del profesor</strong>. Es un umbral metodológico definido por
+el proyecto, exclusivamente a partir de training, para evitar que una variable
+con información observada en menos de 30 % de los encuentros domine el flujo con
+imputación. Se documenta y se aplica dentro de la selección previa al Pipeline:</p>
+<ul class="simple">
+<li><p><strong>&gt;70 %:</strong> excluir la columna por información excesivamente incompleta;</p></li>
+<li><p>categóricas restantes: categoría <code class="docutils literal notranslate"><span class="pre">Missing</span></code> dentro del Pipeline;</p></li>
+<li><p>numéricas: mediana aprendida dentro del Pipeline.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plan</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">fila</span> <span class="ow">in</span> <span class="n">miss</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+    <span class="n">pct</span> <span class="o">=</span> <span class="n">fila</span><span class="p">[</span><span class="s2">"faltantes_%"</span><span class="p">]</span>
+    <span class="n">accion</span> <span class="o">=</span> <span class="s2">"eliminar la variable"</span> <span class="k">if</span> <span class="n">pct</span> <span class="o">&gt;</span> <span class="mi">70</span> <span class="k">else</span> <span class="s2">"categoría «Missing»"</span>
+    <span class="n">plan</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"variable"</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span> <span class="s2">"faltantes_%"</span><span class="p">:</span> <span class="nb">round</span><span class="p">(</span><span class="n">pct</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s2">"tratamiento"</span><span class="p">:</span> <span class="n">accion</span><span class="p">})</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">plan</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>faltantes_%</th>
+      <th>tratamiento</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>weight</td>
+      <td>96.90</td>
+      <td>eliminar la variable</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>medical_specialty</td>
+      <td>48.85</td>
+      <td>categoría «Missing»</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>payer_code</td>
+      <td>39.61</td>
+      <td>categoría «Missing»</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>race</td>
+      <td>2.21</td>
+      <td>categoría «Missing»</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>diag_3</td>
+      <td>1.42</td>
+      <td>categoría «Missing»</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>diag_2</td>
+      <td>0.36</td>
+      <td>categoría «Missing»</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>diag_1</td>
+      <td>0.02</td>
+      <td>categoría «Missing»</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>gender</td>
+      <td>0.00</td>
+      <td>categoría «Missing»</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+</section>
+</section>
+<section id="duplicados-y-casi-duplicados">
+<h2>Duplicados y casi-duplicados<a class="headerlink" href="#duplicados-y-casi-duplicados" title="Link to this heading">#</a></h2>
+<p>Se cuentan los duplicados exactos (ignorando el identificador del encuentro) y los casi-duplicados: encuentros que coinciden en
+todas las variables clínicas principales.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sin_id</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">ID_COL</span><span class="p">])</span>
+<span class="n">dup_exactos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sin_id</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+<span class="n">dup_paciente</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">train</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span> <span class="o">!=</span> <span class="n">ID_COL</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+<span class="n">claves</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"patient_nbr"</span><span class="p">,</span> <span class="s2">"age"</span><span class="p">,</span> <span class="s2">"gender"</span><span class="p">,</span> <span class="s2">"race"</span><span class="p">,</span> <span class="s2">"admission_type_id"</span><span class="p">,</span> <span class="s2">"discharge_disposition_id"</span><span class="p">,</span> <span class="s2">"admission_source_id"</span><span class="p">,</span>
+                      <span class="s2">"time_in_hospital"</span><span class="p">,</span> <span class="s2">"num_lab_procedures"</span><span class="p">,</span> <span class="s2">"num_procedures"</span><span class="p">,</span> <span class="s2">"num_medications"</span><span class="p">,</span> <span class="s2">"number_diagnoses"</span><span class="p">,</span>
+                      <span class="s2">"diag_1"</span><span class="p">,</span> <span class="s2">"insulin"</span><span class="p">,</span> <span class="s2">"change"</span><span class="p">,</span> <span class="s2">"diabetesMed"</span><span class="p">]</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">train</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+<span class="n">casi</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">duplicated</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">claves</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+<span class="n">repetidos</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">por_paciente</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- **Duplicados exactos** (todas las columnas menos `</span><span class="si">{</span><span class="n">ID_COL</span><span class="si">}</span><span class="s2">`): </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">dup_exactos</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="sa">f</span><span class="s2">"- **Casi-duplicados** (coinciden en </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">claves</span><span class="p">)</span><span class="si">}</span><span class="s2"> variables clínicas y de paciente): </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">casi</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> filas involucradas</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="sa">f</span><span class="s2">"- **Pacientes con más de un encuentro:** </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">repetidos</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">repetidos</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">por_paciente</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">pct</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="si">}</span><span class="s2"> de los pacientes)"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<ul class="simple">
+<li><p><strong>Duplicados exactos</strong> (todas las columnas menos <code class="docutils literal notranslate"><span class="pre">encounter_id</span></code>): 0</p></li>
+<li><p><strong>Casi-duplicados</strong> (coinciden en 16 variables clínicas y de paciente): 0 filas involucradas</p></li>
+<li><p><strong>Pacientes con más de un encuentro:</strong> 13.364 (23,4 % de los pacientes)</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="valores-atipicos">
+<h2>Valores atípicos<a class="headerlink" href="#valores-atipicos" title="Link to this heading">#</a></h2>
+<p>Se mide con la regla del IQR (valores fuera de [Q1 − 1,5·IQR, Q3 + 1,5·IQR]). En variables de conteo con cola larga, los valores altos
+suelen ser <strong>casos reales pero extremos</strong> (pacientes con muchas visitas previas), no errores; se conservan y se trata la asimetría
+con una transformación (capítulo 8).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">resumen_num</span> <span class="o">=</span> <span class="n">numeric_summary</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">num_cols</span><span class="p">])</span>
+<span class="n">top_out</span> <span class="o">=</span> <span class="n">resumen_num</span><span class="p">[</span><span class="s2">"outliers_IQR_%"</span><span class="p">]</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">resumen_num</span><span class="p">[[</span><span class="s2">"media"</span><span class="p">,</span> <span class="s2">"mediana"</span><span class="p">,</span> <span class="s2">"mínimo"</span><span class="p">,</span> <span class="s2">"máximo"</span><span class="p">,</span> <span class="s2">"asimetría"</span><span class="p">,</span> <span class="s2">"outliers_IQR_%"</span><span class="p">]]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="n">md_out</span><span class="p">(</span><span class="s2">"Las variables con mayor proporción de valores atípicos son "</span> <span class="o">+</span>
+       <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">** (</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">top_out</span><span class="p">[</span><span class="n">v</span><span class="p">],</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2"> %)"</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">top_out</span><span class="o">.</span><span class="n">index</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span> <span class="o">+</span> <span class="s2">"."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>media</th>
+      <th>mediana</th>
+      <th>mínimo</th>
+      <th>máximo</th>
+      <th>asimetría</th>
+      <th>outliers_IQR_%</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>time_in_hospital</th>
+      <td>4.40</td>
+      <td>4.0</td>
+      <td>1.0</td>
+      <td>14.0</td>
+      <td>1.13</td>
+      <td>2.22</td>
+    </tr>
+    <tr>
+      <th>num_lab_procedures</th>
+      <td>43.08</td>
+      <td>44.0</td>
+      <td>1.0</td>
+      <td>132.0</td>
+      <td>-0.23</td>
+      <td>0.15</td>
+    </tr>
+    <tr>
+      <th>num_procedures</th>
+      <td>1.34</td>
+      <td>1.0</td>
+      <td>0.0</td>
+      <td>6.0</td>
+      <td>1.32</td>
+      <td>4.87</td>
+    </tr>
+    <tr>
+      <th>num_medications</th>
+      <td>16.03</td>
+      <td>15.0</td>
+      <td>1.0</td>
+      <td>81.0</td>
+      <td>1.33</td>
+      <td>2.52</td>
+    </tr>
+    <tr>
+      <th>number_outpatient</th>
+      <td>0.37</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>42.0</td>
+      <td>8.82</td>
+      <td>16.43</td>
+    </tr>
+    <tr>
+      <th>number_emergency</th>
+      <td>0.20</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>76.0</td>
+      <td>24.19</td>
+      <td>11.14</td>
+    </tr>
+    <tr>
+      <th>number_inpatient</th>
+      <td>0.64</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>21.0</td>
+      <td>3.69</td>
+      <td>6.95</td>
+    </tr>
+    <tr>
+      <th>number_diagnoses</th>
+      <td>7.42</td>
+      <td>8.0</td>
+      <td>1.0</td>
+      <td>16.0</td>
+      <td>-0.88</td>
+      <td>0.28</td>
+    </tr>
+    <tr>
+      <th>age_mid</th>
+      <td>65.97</td>
+      <td>65.0</td>
+      <td>5.0</td>
+      <td>95.0</td>
+      <td>-0.64</td>
+      <td>0.86</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><p>Las variables con mayor proporción de valores atípicos son <strong>number_outpatient</strong> (16,4 %), <strong>number_emergency</strong> (11,1 %), <strong>number_inpatient</strong> (6,9 %).</p>
+</div>
+</div>
+</section>
+<section id="valores-imposibles-o-inconsistentes">
+<h2>Valores imposibles o inconsistentes<a class="headerlink" href="#valores-imposibles-o-inconsistentes" title="Link to this heading">#</a></h2>
+<p>Comprobaciones de rangos, categorías mal escritas y coherencias entre variables.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">checks</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">checks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s2">"Sexo distinto de Male/Female"</span><span class="p">,</span> <span class="nb">int</span><span class="p">((</span><span class="o">~</span><span class="n">train</span><span class="p">[</span><span class="s2">"gender"</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">([</span><span class="s2">"Male"</span><span class="p">,</span> <span class="s2">"Female"</span><span class="p">])</span> <span class="o">&amp;</span> <span class="n">train</span><span class="p">[</span><span class="s2">"gender"</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">())))</span>
+<span class="n">checks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s2">"Días de hospitalización fuera de 1–14"</span><span class="p">,</span> <span class="nb">int</span><span class="p">((</span><span class="o">~</span><span class="n">train</span><span class="p">[</span><span class="s2">"time_in_hospital"</span><span class="p">]</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">14</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">())))</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"num_lab_procedures"</span><span class="p">,</span> <span class="s2">"num_procedures"</span><span class="p">,</span> <span class="s2">"num_medications"</span><span class="p">,</span> <span class="s2">"number_outpatient"</span><span class="p">,</span> <span class="s2">"number_emergency"</span><span class="p">,</span> <span class="s2">"number_inpatient"</span><span class="p">,</span> <span class="s2">"number_diagnoses"</span><span class="p">]:</span>
+    <span class="n">checks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s2"> negativo"</span><span class="p">,</span> <span class="nb">int</span><span class="p">((</span><span class="n">train</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())))</span>
+<span class="n">edades_validas</span> <span class="o">=</span> <span class="n">train</span><span class="p">[</span><span class="s2">"age"</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^\[\d+-\d+\)$"</span><span class="p">)</span>
+<span class="n">checks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s2">"Rango de edad con formato inesperado"</span><span class="p">,</span> <span class="nb">int</span><span class="p">((</span><span class="o">~</span><span class="n">edades_validas</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())))</span>
+<span class="n">term_ids</span> <span class="o">=</span> <span class="n">terminal_disposition_ids</span><span class="p">()</span>
+<span class="n">checks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="sa">f</span><span class="s2">"Alta por fallecimiento u hospicio (códigos </span><span class="si">{</span><span class="n">term_ids</span><span class="si">}</span><span class="s2">)"</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">train</span><span class="p">[</span><span class="s2">"discharge_disposition_id"</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">term_ids</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())))</span>
+<span class="k">if</span> <span class="s2">"admission_type_id"</span> <span class="ow">in</span> <span class="n">train</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">{</span><span class="mi">4</span><span class="p">:</span> <span class="s2">"Newborn"</span><span class="p">}</span>
+    <span class="n">nac</span> <span class="o">=</span> <span class="n">train</span><span class="p">[</span><span class="s2">"admission_type_id"</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span>
+    <span class="n">checks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s2">"Ingreso «Newborn» en mayores de 10 años"</span><span class="p">,</span> <span class="nb">int</span><span class="p">((</span><span class="n">nac</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">age_midpoint</span><span class="p">(</span><span class="n">train</span><span class="p">[</span><span class="s2">"age"</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">())))</span>
+<span class="n">const</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">train</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">train</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">checks</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="sa">f</span><span class="s2">"Columnas constantes: </span><span class="si">{</span><span class="n">const</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">const</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'ninguna'</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">const</span><span class="p">)))</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">checks</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">"comprobación"</span><span class="p">,</span> <span class="s2">"casos"</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>comprobación</th>
+      <th>casos</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Sexo distinto de Male/Female</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Días de hospitalización fuera de 1–14</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>num_lab_procedures negativo</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>num_procedures negativo</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>num_medications negativo</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>number_outpatient negativo</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>number_emergency negativo</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>number_inpatient negativo</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>number_diagnoses negativo</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>Rango de edad con formato inesperado</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>Alta por fallecimiento u hospicio (códigos [11, 13, 14, 19, 20, 21])</td>
+      <td>1940</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>Ingreso «Newborn» en mayores de 10 años</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>Columnas constantes: ['examide', 'citoglipton']</td>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p><strong>Lo más relevante:</strong> las altas por fallecimiento u hospicio no son errores de captura, pero definen una <strong>población que no puede reingresar</strong>;
+se discuten como riesgo de fuga en el capítulo 7. Las columnas constantes no aportan información y se eliminan en el capítulo 8.</p>
+</section>
+<section id="sesgos-de-muestreo-y-representatividad">
+<h2>Sesgos de muestreo y representatividad<a class="headerlink" href="#sesgos-de-muestreo-y-representatividad" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Población:</strong> solo estancias hospitalarias de 1 a 14 días de pacientes diagnosticados con diabetes, con pruebas de laboratorio y
+medicamentos administrados. No representa a todos los pacientes con diabetes (excluye a quienes no se hospitalizan).</p></li>
+<li><p><strong>Origen:</strong> 130 hospitales y redes de salud de Estados Unidos, 1999-2008. Las prácticas clínicas y los criterios de reingreso han
+cambiado desde entonces, y el sistema de salud de EE. UU. no es extrapolable sin más a otros países.</p></li>
+<li><p><strong>Reingresos a otros hospitales:</strong> un paciente que reingresa en un hospital distinto al del dataset no se observa como reingreso;
+la tasa real podría ser mayor.</p></li>
+<li><p><strong>Sin fecha por encuentro:</strong> no se puede estudiar deriva temporal.</p></li>
+<li><p><strong>Variables sensibles:</strong> raza y sexo están disponibles; su relación con el reingreso puede reflejar acceso a la atención y no diferencias biológicas.</p></li>
+</ul>
+</section>
+<section id="consideraciones-eticas">
+<h2>Consideraciones éticas<a class="headerlink" href="#consideraciones-eticas" title="Link to this heading">#</a></h2>
+<p>Los datos vienen anonimizados (sin nombres ni fechas exactas), pero combinan edad en rangos, diagnósticos, especialidad, hospital de origen
+implícito y fechas relativas; con información externa podría intentarse reidentificar a algún paciente. Por eso este proyecto no
+intenta ningún cruce con otras fuentes y solo publica resultados agregados. Un modelo de riesgo de reingreso debe usarse como <strong>apoyo</strong>
+a la decisión clínica, nunca para negar atención, y sus errores deben auditarse por grupo (raza, sexo, edad).</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./notebooks"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="01_introduccion.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">1. Introducción: reingreso hospitalario antes de 30 días</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="03_eda_objetivo.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">3. EDA de la variable objetivo: reingreso antes de 30 días</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#diccionario-de-datos">Diccionario de datos</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#tamano-de-la-muestra">Tamaño de la muestra</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#valores-faltantes-patron">Valores faltantes: patrón</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#valores-faltantes-mecanismo-mcar-mar-o-mnar">Valores faltantes: mecanismo (MCAR, MAR o MNAR)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plan-de-tratamiento-de-los-faltantes">Plan de tratamiento de los faltantes</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#duplicados-y-casi-duplicados">Duplicados y casi-duplicados</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#valores-atipicos">Valores atípicos</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#valores-imposibles-o-inconsistentes">Valores imposibles o inconsistentes</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sesgos-de-muestreo-y-representatividad">Sesgos de muestreo y representatividad</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#consideraciones-eticas">Consideraciones éticas</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Proyecto de Machine Learning — Maestría en Ingeniería Industrial
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

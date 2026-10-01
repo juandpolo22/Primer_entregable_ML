@@ -1,0 +1,1345 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>5. Análisis bivariado &#8212; Predicción de reingreso hospitalario antes de 30 días</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/05_eda_bivariado';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="6. EDA multivariado" href="06_eda_multivariado.html" />
+    <link rel="prev" title="4. Análisis univariado" href="04_eda_univariado.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="01_introduccion.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Predicción de reingreso hospitalario antes de 30 días - Home"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Predicción de reingreso hospitalario antes de 30 días - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="01_introduccion.html">
+                    1. Introducción: reingreso hospitalario antes de 30 días
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="02_datos.html">2. La base de datos: tamaño, calidad y representatividad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_eda_objetivo.html">3. EDA de la variable objetivo: reingreso antes de 30 días</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_eda_univariado.html">4. Análisis univariado</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">5. Análisis bivariado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_eda_multivariado.html">6. EDA multivariado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_data_leakage.html">7. Auditoría de data leakage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_preprocesamiento.html">8. Preprocesamiento y Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_modelo_base.html">9. Modelo base: línea base trivial y regresión logística</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10_conclusiones.html">10. Conclusiones, limitaciones y checklist</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/notebooks/05_eda_bivariado.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>5. Análisis bivariado</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#variables-numericas-frente-al-objetivo">Variables numéricas frente al objetivo</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#variables-categoricas-frente-al-objetivo">Variables categóricas frente al objetivo</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#relaciones-entre-predictoras-ejemplos-representativos">Relaciones entre predictoras: ejemplos representativos</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ranking-unificado-de-variables-seleccion-preliminar">Ranking unificado de variables (selección preliminar)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#informacion-mutua">Información mutua</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="analisis-bivariado">
+<h1>5. Análisis bivariado<a class="headerlink" href="#analisis-bivariado" title="Link to this heading">#</a></h1>
+<p>Se estudian relaciones numérica–numérica, categórica–numérica,
+categórica–categórica y predictora–target. Se combinan pruebas estadísticas,
+tamaños de efecto, FDR e información mutua. Los p-values no se interpretan de
+forma aislada debido al gran tamaño muestral.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Markdown</span><span class="p">,</span> <span class="n">display</span>
+
+<span class="n">project_root</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">"_config.yml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">project_root</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">project_root</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">"No se encontró _config.yml. Ejecuta el notebook dentro de la carpeta del libro."</span><span class="p">)</span>
+    <span class="n">project_root</span> <span class="o">=</span> <span class="n">project_root</span><span class="o">.</span><span class="n">parent</span>
+<span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_root</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">_folder</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"tables"</span><span class="p">,</span> <span class="s2">"figures"</span><span class="p">):</span>          <span class="c1"># se crean si no existen</span>
+    <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">_folder</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.project_utils</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">configure_plots</span><span class="p">()</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.max_columns"</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.width"</span><span class="p">,</span> <span class="mi">170</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.max_colwidth"</span><span class="p">,</span> <span class="mi">70</span><span class="p">)</span>
+<span class="n">TABLES</span> <span class="o">=</span> <span class="n">project_root</span> <span class="o">/</span> <span class="s2">"tables"</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">md_out</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">Markdown</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+
+<span class="n">train</span> <span class="o">=</span> <span class="n">load_train</span><span class="p">()</span>
+<span class="n">frame</span> <span class="o">=</span> <span class="n">prepare_frame</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="n">num_cols</span><span class="p">,</span> <span class="n">cat_cols</span> <span class="o">=</span> <span class="n">column_types</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">TARGET</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="variables-numericas-frente-al-objetivo">
+<h2>Variables numéricas frente al objetivo<a class="headerlink" href="#variables-numericas-frente-al-objetivo" title="Link to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">num_cols</span><span class="p">:</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">(),</span> <span class="n">frame</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+    <span class="n">u</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">mannwhitneyu</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">alternative</span><span class="o">=</span><span class="s2">"two-sided"</span><span class="p">)</span>
+    <span class="n">auc</span> <span class="o">=</span> <span class="n">u</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">))</span>
+    <span class="n">r_pb</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">pointbiserialr</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"variable"</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">"media con reingreso"</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="s2">"media sin reingreso"</span><span class="p">:</span> <span class="n">b</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                 <span class="s2">"diferencia"</span><span class="p">:</span> <span class="n">a</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">b</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="s2">"AUC univariado"</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">auc</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">auc</span><span class="p">),</span>
+                 <span class="s2">"rank-biserial"</span><span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">auc</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"punto-biserial"</span><span class="p">:</span> <span class="n">r_pb</span><span class="p">,</span> <span class="s2">"p_valor"</span><span class="p">:</span> <span class="n">p</span><span class="p">})</span>
+<span class="n">num_vs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+<span class="n">num_vs</span><span class="p">[</span><span class="s2">"p_fdr"</span><span class="p">]</span> <span class="o">=</span> <span class="n">fdr_bh</span><span class="p">(</span><span class="n">num_vs</span><span class="p">[</span><span class="s2">"p_valor"</span><span class="p">])</span>
+<span class="n">num_vs</span> <span class="o">=</span> <span class="n">num_vs</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"AUC univariado"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">num_vs</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"numericas_vs_objetivo.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">num_vs</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">top</span> <span class="o">=</span> <span class="n">num_vs</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"La variable numérica más asociada es **</span><span class="si">{</span><span class="n">top</span><span class="p">[</span><span class="s1">'variable'</span><span class="p">]</span><span class="si">}</span><span class="s2">** (AUC univariado </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">top</span><span class="p">[</span><span class="s1">'AUC univariado'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">; media </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">top</span><span class="p">[</span><span class="s1">'media con reingreso'</span><span class="p">],</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> "</span>
+       <span class="sa">f</span><span class="s2">"con reingreso frente a </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">top</span><span class="p">[</span><span class="s1">'media sin reingreso'</span><span class="p">],</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> sin reingreso). "</span>
+       <span class="sa">f</span><span class="s2">"**</span><span class="si">{</span><span class="nb">int</span><span class="p">((</span><span class="n">num_vs</span><span class="p">[</span><span class="s1">'p_fdr'</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.05</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="si">}</span><span class="s2"> de </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">num_vs</span><span class="p">)</span><span class="si">}</span><span class="s2">** variables tienen diferencia significativa tras la corrección FDR, pero "</span>
+       <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'ninguna'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">num_vs</span><span class="p">[</span><span class="s1">'AUC univariado'</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mf">0.55</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'solo '</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">num_vs</span><span class="p">[</span><span class="s1">'AUC univariado'</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mf">0.55</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span><span class="si">}</span><span class="s2"> supera un AUC de 0,55: los efectos individuales son **pequeños**."</span>
+      <span class="k">if</span> <span class="n">num_vs</span><span class="p">[</span><span class="s1">'AUC univariado'</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.65</span> <span class="k">else</span> <span class="s2">"hay variables con un efecto individual apreciable."</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>media con reingreso</th>
+      <th>media sin reingreso</th>
+      <th>diferencia</th>
+      <th>AUC univariado</th>
+      <th>rank-biserial</th>
+      <th>punto-biserial</th>
+      <th>p_valor</th>
+      <th>p_fdr</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>number_inpatient</td>
+      <td>1.2531</td>
+      <td>0.5609</td>
+      <td>0.6922</td>
+      <td>0.6096</td>
+      <td>0.2192</td>
+      <td>0.1706</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>num_medications</td>
+      <td>16.9630</td>
+      <td>15.9169</td>
+      <td>1.0461</td>
+      <td>0.5431</td>
+      <td>0.0861</td>
+      <td>0.0403</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>time_in_hospital</td>
+      <td>4.7330</td>
+      <td>4.3536</td>
+      <td>0.3794</td>
+      <td>0.5429</td>
+      <td>0.0858</td>
+      <td>0.0399</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>number_diagnoses</td>
+      <td>7.6910</td>
+      <td>7.3877</td>
+      <td>0.3033</td>
+      <td>0.5406</td>
+      <td>0.0811</td>
+      <td>0.0492</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>number_emergency</td>
+      <td>0.3723</td>
+      <td>0.1770</td>
+      <td>0.1953</td>
+      <td>0.5328</td>
+      <td>0.0656</td>
+      <td>0.0638</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>number_outpatient</td>
+      <td>0.4449</td>
+      <td>0.3583</td>
+      <td>0.0866</td>
+      <td>0.5226</td>
+      <td>0.0451</td>
+      <td>0.0215</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>age_mid</td>
+      <td>66.7732</td>
+      <td>65.8719</td>
+      <td>0.9013</td>
+      <td>0.5176</td>
+      <td>0.0353</td>
+      <td>0.0177</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>num_lab_procedures</td>
+      <td>44.1465</td>
+      <td>42.9453</td>
+      <td>1.2012</td>
+      <td>0.5176</td>
+      <td>0.0352</td>
+      <td>0.0191</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>num_procedures</td>
+      <td>1.2788</td>
+      <td>1.3477</td>
+      <td>-0.0689</td>
+      <td>0.5060</td>
+      <td>-0.0120</td>
+      <td>-0.0127</td>
+      <td>0.0489</td>
+      <td>0.0489</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><p>La variable numérica más asociada es <strong>number_inpatient</strong> (AUC univariado 0,610; media 1,25 con reingreso frente a 0,56 sin reingreso). <strong>9 de 9</strong> variables tienen diferencia significativa tras la corrección FDR, pero solo 1 supera un AUC de 0,55: los efectos individuales son <strong>pequeños</strong>.</p>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">top4</span> <span class="o">=</span> <span class="n">num_vs</span><span class="p">[</span><span class="s2">"variable"</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="n">muestra</span> <span class="o">=</span> <span class="n">frame</span>  <span class="c1"># visualización con todo training; no se altera la distribución</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mf">3.8</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">top4</span><span class="p">):</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"reingreso"</span><span class="p">:</span> <span class="n">muestra</span><span class="p">[</span><span class="n">TARGET</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">({</span><span class="mi">0</span><span class="p">:</span> <span class="s2">"no"</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s2">"sí"</span><span class="p">}),</span> <span class="n">c</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">log1p</span><span class="p">(</span><span class="n">muestra</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="k">if</span> <span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">skew</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">muestra</span><span class="p">[</span><span class="n">c</span><span class="p">]})</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">violinplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="s2">"reingreso"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">c</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">"reingreso"</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="p">[</span><span class="s2">"#4c78a8"</span><span class="p">,</span> <span class="s2">"#e45756"</span><span class="p">],</span> <span class="n">order</span><span class="o">=</span><span class="p">[</span><span class="s2">"no"</span><span class="p">,</span> <span class="s2">"sí"</span><span class="p">],</span> <span class="n">hue_order</span><span class="o">=</span><span class="p">[</span><span class="s2">"no"</span><span class="p">,</span> <span class="s2">"sí"</span><span class="p">])</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">c</span> <span class="o">+</span> <span class="p">(</span><span class="s2">" (log1p)"</span> <span class="k">if</span> <span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">skew</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">""</span><span class="p">));</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">save_figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"05_violines_numericas.png"</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/1621d3d5f71ee9991a12a48e617bf615b9e193518e3e2e08b1c070ce6b213c2c.png" src="../_images/1621d3d5f71ee9991a12a48e617bf615b9e193518e3e2e08b1c070ce6b213c2c.png" />
+</div>
+</div>
+</section>
+<section id="variables-categoricas-frente-al-objetivo">
+<h2>Variables categóricas frente al objetivo<a class="headerlink" href="#variables-categoricas-frente-al-objetivo" title="Link to this heading">#</a></h2>
+<p>Para cada categórica: χ² de independencia y <strong>V de Cramér</strong> con corrección de sesgo (0 = independientes; 1 = asociación perfecta).
+Los códigos de diagnóstico crudos se sustituyen por sus grupos clínicos; las medicaciones casi constantes se conservan en la tabla.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cats</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cat_cols</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"diag_1"</span><span class="p">,</span> <span class="s2">"diag_2"</span><span class="p">,</span> <span class="s2">"diag_3"</span><span class="p">)]</span>
+<span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cats</span><span class="p">:</span>
+    <span class="n">v</span><span class="p">,</span> <span class="n">chi2</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">cramers_v</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"variable"</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">"niveles"</span><span class="p">:</span> <span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="s2">"V de Cramér"</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span> <span class="s2">"chi2"</span><span class="p">:</span> <span class="n">chi2</span><span class="p">,</span> <span class="s2">"p_valor"</span><span class="p">:</span> <span class="n">p</span><span class="p">})</span>
+<span class="n">cat_vs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+<span class="n">cat_vs</span><span class="p">[</span><span class="s2">"p_fdr"</span><span class="p">]</span> <span class="o">=</span> <span class="n">fdr_bh</span><span class="p">(</span><span class="n">cat_vs</span><span class="p">[</span><span class="s2">"p_valor"</span><span class="p">])</span>
+<span class="n">cat_vs</span> <span class="o">=</span> <span class="n">cat_vs</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"V de Cramér"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">cat_vs</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"categoricas_vs_objetivo.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">cat_vs</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Las categóricas más asociadas son "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"**</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2">** (V = </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">'V de Cramér'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">cat_vs</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">iterrows</span><span class="p">())</span> <span class="o">+</span>
+       <span class="sa">f</span><span class="s2">". **</span><span class="si">{</span><span class="nb">int</span><span class="p">((</span><span class="n">cat_vs</span><span class="p">[</span><span class="s1">'p_fdr'</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">0.05</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="si">}</span><span class="s2"> de </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cat_vs</span><span class="p">)</span><span class="si">}</span><span class="s2">** son significativas tras FDR; "</span> 
+       <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'ninguna'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cat_vs</span><span class="p">[</span><span class="s1">'V de Cramér'</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mf">0.10</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'solo '</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">cat_vs</span><span class="p">[</span><span class="s1">'V de Cramér'</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mf">0.10</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span><span class="si">}</span><span class="s2"> tiene V ≥ 0,10 (asociación moderada o mayor)."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>niveles</th>
+      <th>V de Cramér</th>
+      <th>chi2</th>
+      <th>p_valor</th>
+      <th>p_fdr</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>discharge_disposition_id</td>
+      <td>26</td>
+      <td>0.1186</td>
+      <td>1170.9809</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>medical_specialty</td>
+      <td>70</td>
+      <td>0.0516</td>
+      <td>286.8979</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>insulin</td>
+      <td>4</td>
+      <td>0.0419</td>
+      <td>145.8667</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>age</td>
+      <td>10</td>
+      <td>0.0329</td>
+      <td>96.9153</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>diag_1_grupo</td>
+      <td>10</td>
+      <td>0.0281</td>
+      <td>73.5095</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>diag_3_grupo</td>
+      <td>10</td>
+      <td>0.0278</td>
+      <td>71.8661</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>payer_code</td>
+      <td>17</td>
+      <td>0.0270</td>
+      <td>76.2382</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>diabetesMed</td>
+      <td>2</td>
+      <td>0.0255</td>
+      <td>53.7694</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>metformin</td>
+      <td>4</td>
+      <td>0.0218</td>
+      <td>41.8360</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>diag_2_grupo</td>
+      <td>10</td>
+      <td>0.0194</td>
+      <td>39.6637</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>A1Cresult</td>
+      <td>4</td>
+      <td>0.0190</td>
+      <td>32.4277</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>admission_source_id</td>
+      <td>17</td>
+      <td>0.0186</td>
+      <td>44.2314</td>
+      <td>0.0002</td>
+      <td>0.0005</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>change</td>
+      <td>2</td>
+      <td>0.0181</td>
+      <td>27.6437</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>race</td>
+      <td>5</td>
+      <td>0.0153</td>
+      <td>23.9523</td>
+      <td>0.0002</td>
+      <td>0.0006</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>admission_type_id</td>
+      <td>8</td>
+      <td>0.0121</td>
+      <td>18.8358</td>
+      <td>0.0087</td>
+      <td>0.0215</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><p>Las categóricas más asociadas son <strong>discharge_disposition_id</strong> (V = 0,119), <strong>medical_specialty</strong> (V = 0,052), <strong>insulin</strong> (V = 0,042). <strong>16 de 39</strong> son significativas tras FDR; solo 1 tiene V ≥ 0,10 (asociación moderada o mayor).</p>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">top_cat</span> <span class="o">=</span> <span class="n">cat_vs</span><span class="p">[</span><span class="s2">"variable"</span><span class="p">]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="n">base</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">top_cat</span><span class="p">):</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">rate_table</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">y</span><span class="p">,</span> <span class="n">min_n</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s2">"age"</span><span class="p">:</span>                                   <span class="c1"># las edades se ordenan por rango, no por frecuencia</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"categoria"</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(\d+)"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">iloc</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">"tasa"</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)),</span> <span class="n">xerr</span><span class="o">=</span><span class="p">[(</span><span class="n">t</span><span class="p">[</span><span class="s2">"tasa"</span><span class="p">]</span> <span class="o">-</span> <span class="n">t</span><span class="p">[</span><span class="s2">"ic_inf"</span><span class="p">])</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">"ic_sup"</span><span class="p">]</span> <span class="o">-</span> <span class="n">t</span><span class="p">[</span><span class="s2">"tasa"</span><span class="p">])</span> <span class="o">*</span> <span class="mi">100</span><span class="p">],</span> <span class="n">fmt</span><span class="o">=</span><span class="s2">"o"</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#e45756"</span><span class="p">,</span> <span class="n">capsize</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">base</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"gray"</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)));</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">"categoria"</span><span class="p">],</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">c</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"</span><span class="si">% c</span><span class="s2">on reingreso (IC 95 </span><span class="si">% d</span><span class="s2">e Wilson)"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">"Tasa de reingreso por categoría (línea gris = tasa global)"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">1.01</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">save_figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"05_tasas_por_categoria.png"</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/203ac223d9a32d541e7d377acc3734655726561d81d02964d3f84c8bb768c4df.png" src="../_images/203ac223d9a32d541e7d377acc3734655726561d81d02964d3f84c8bb768c4df.png" />
+</div>
+</div>
+</section>
+<section id="relaciones-entre-predictoras-ejemplos-representativos">
+<h2>Relaciones entre predictoras: ejemplos representativos<a class="headerlink" href="#relaciones-entre-predictoras-ejemplos-representativos" title="Link to this heading">#</a></h2>
+<p>Estos análisis complementan la relación con el target sin producir cientos
+de gráficos. Se usan todas las filas de training disponibles.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Numérica vs numérica: par con mayor asociación monotónica.</span>
+<span class="n">corr_s</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">num_cols</span><span class="p">]</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s2">"spearman"</span><span class="p">)</span>
+<span class="n">upper</span> <span class="o">=</span> <span class="n">corr_s</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">corr_s</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">))</span><span class="o">.</span><span class="n">stack</span><span class="p">()</span>
+<span class="n">num_a</span><span class="p">,</span> <span class="n">num_b</span> <span class="o">=</span> <span class="n">upper</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span>
+<span class="n">pair</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[[</span><span class="n">num_a</span><span class="p">,</span> <span class="n">num_b</span><span class="p">]]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.5</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">))</span>
+<span class="n">hb</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">hexbin</span><span class="p">(</span><span class="n">pair</span><span class="p">[</span><span class="n">num_a</span><span class="p">],</span> <span class="n">pair</span><span class="p">[</span><span class="n">num_b</span><span class="p">],</span> <span class="n">gridsize</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="s2">"log"</span><span class="p">,</span> <span class="n">mincnt</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"viridis"</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">hb</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"log10(conteo)"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Relación numérica: </span><span class="si">{</span><span class="n">num_a</span><span class="si">}</span><span class="s2"> vs </span><span class="si">{</span><span class="n">num_b</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">xlabel</span><span class="o">=</span><span class="n">num_a</span><span class="p">,</span> <span class="n">ylabel</span><span class="o">=</span><span class="n">num_b</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">save_figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"05_hexbin_numericas.png"</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"El par numérico con mayor |Spearman| es `</span><span class="si">{</span><span class="n">num_a</span><span class="si">}</span><span class="s2">`–`</span><span class="si">{</span><span class="n">num_b</span><span class="si">}</span><span class="s2">`: Pearson = </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">num_a</span><span class="p">]</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">num_b</span><span class="p">],</span><span class="w"> </span><span class="n">method</span><span class="o">=</span><span class="s1">'pearson'</span><span class="p">),</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> y Spearman = </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">corr_s</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">num_a</span><span class="p">,</span><span class="w"> </span><span class="n">num_b</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">. La diferencia entre ambas medidas ayuda a detectar relaciones monotónicas no estrictamente lineales."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/8b7db274154f8e25904643dc0b971e7f8a19b944b74207fc4997a9d2029968b7.png" src="../_images/8b7db274154f8e25904643dc0b971e7f8a19b944b74207fc4997a9d2029968b7.png" />
+<p>El par numérico con mayor |Spearman| es <code class="docutils literal notranslate"><span class="pre">time_in_hospital</span></code>–<code class="docutils literal notranslate"><span class="pre">num_medications</span></code>: Pearson = 0,469 y Spearman = 0,467. La diferencia entre ambas medidas ayuda a detectar relaciones monotónicas no estrictamente lineales.</p>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Categórica vs numérica: Kruskal-Wallis y epsilon cuadrado.</span>
+<span class="n">cat_demo</span><span class="p">,</span> <span class="n">num_demo</span> <span class="o">=</span> <span class="s2">"admission_type_id"</span><span class="p">,</span> <span class="s2">"time_in_hospital"</span>
+<span class="n">demo</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[[</span><span class="n">cat_demo</span><span class="p">,</span> <span class="n">num_demo</span><span class="p">]]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">valid_levels</span> <span class="o">=</span> <span class="n">demo</span><span class="p">[</span><span class="n">cat_demo</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()[</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span> <span class="o">&gt;=</span> <span class="mi">200</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+<span class="n">demo</span> <span class="o">=</span> <span class="n">demo</span><span class="p">[</span><span class="n">demo</span><span class="p">[</span><span class="n">cat_demo</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">valid_levels</span><span class="p">)]</span>
+<span class="n">arrays</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span><span class="p">[</span><span class="n">num_demo</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">demo</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">cat_demo</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">False</span><span class="p">)]</span>
+<span class="n">h_kw</span><span class="p">,</span> <span class="n">p_kw</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">kruskal</span><span class="p">(</span><span class="o">*</span><span class="n">arrays</span><span class="p">)</span>
+<span class="n">k_kw</span><span class="p">,</span> <span class="n">n_kw</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arrays</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">demo</span><span class="p">)</span>
+<span class="n">epsilon2</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="p">(</span><span class="n">h_kw</span> <span class="o">-</span> <span class="n">k_kw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">n_kw</span> <span class="o">-</span> <span class="n">k_kw</span><span class="p">))</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">demo</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">cat_demo</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">num_demo</span><span class="p">,</span> <span class="n">showfliers</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"#9ecae9"</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Tipo de ingreso y duración de la estancia"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">save_figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"05_categorica_numerica.png"</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Kruskal–Wallis para `</span><span class="si">{</span><span class="n">num_demo</span><span class="si">}</span><span class="s2">` según `</span><span class="si">{</span><span class="n">cat_demo</span><span class="si">}</span><span class="s2">`: H=</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">h_kw</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">, p=</span><span class="si">{</span><span class="n">p_kw</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">, epsilon²=</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">epsilon2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">. La significancia se interpreta junto con epsilon², que cuantifica la magnitud práctica."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/50f88b8937e6dc974c06d3189b57686ed8bd3a352631e9fa6fb0ba591632ced9.png" src="../_images/50f88b8937e6dc974c06d3189b57686ed8bd3a352631e9fa6fb0ba591632ced9.png" />
+<p>Kruskal–Wallis para <code class="docutils literal notranslate"><span class="pre">time_in_hospital</span></code> según <code class="docutils literal notranslate"><span class="pre">admission_type_id</span></code>: H=304,71, p=9.73e-64, epsilon²=0,004. La significancia se interpreta junto con epsilon², que cuantifica la magnitud práctica.</p>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Categórica vs categórica: contingencia, chi-cuadrado y V de Cramér.</span>
+<span class="n">cat_a</span><span class="p">,</span> <span class="n">cat_b</span> <span class="o">=</span> <span class="s2">"change"</span><span class="p">,</span> <span class="s2">"diabetesMed"</span>
+<span class="n">contingency</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">crosstab</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">cat_a</span><span class="p">],</span> <span class="n">frame</span><span class="p">[</span><span class="n">cat_b</span><span class="p">],</span> <span class="n">margins</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">v_demo</span><span class="p">,</span> <span class="n">chi_demo</span><span class="p">,</span> <span class="n">p_demo</span> <span class="o">=</span> <span class="n">cramers_v</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">cat_a</span><span class="p">],</span> <span class="n">frame</span><span class="p">[</span><span class="n">cat_b</span><span class="p">])</span>
+<span class="n">display</span><span class="p">(</span><span class="n">contingency</span><span class="p">)</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"La relación `</span><span class="si">{</span><span class="n">cat_a</span><span class="si">}</span><span class="s2">`–`</span><span class="si">{</span><span class="n">cat_b</span><span class="si">}</span><span class="s2">` tiene χ²=</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">chi_demo</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2">, p=</span><span class="si">{</span><span class="n">p_demo</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2"> y V de Cramér=</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">v_demo</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">. V de Cramér, no solo el p-value, indica la intensidad de la asociación."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th>diabetesMed</th>
+      <th>No</th>
+      <th>Yes</th>
+      <th>All</th>
+    </tr>
+    <tr>
+      <th>change</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Ch</th>
+      <td>0</td>
+      <td>37663</td>
+      <td>37663</td>
+    </tr>
+    <tr>
+      <th>No</th>
+      <td>18745</td>
+      <td>25005</td>
+      <td>43750</td>
+    </tr>
+    <tr>
+      <th>All</th>
+      <td>18745</td>
+      <td>62668</td>
+      <td>81413</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><p>La relación <code class="docutils literal notranslate"><span class="pre">change</span></code>–<code class="docutils literal notranslate"><span class="pre">diabetesMed</span></code> tiene χ²=20.963,81, p=0.00e+00 y V de Cramér=0,507. V de Cramér, no solo el p-value, indica la intensidad de la asociación.</p>
+</div>
+</div>
+</section>
+<section id="ranking-unificado-de-variables-seleccion-preliminar">
+<h2>Ranking unificado de variables (selección preliminar)<a class="headerlink" href="#ranking-unificado-de-variables-seleccion-preliminar" title="Link to this heading">#</a></h2>
+<p>Para comparar numéricas y categóricas en la misma escala se calcula el <strong>AUC univariado</strong> de cada una: directo para las numéricas, y para
+las categóricas codificándolas con la tasa del objetivo calculada <strong>fuera de pliegue</strong> (por paciente), de modo que el AUC no sea optimista.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">groups</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">GROUP_COL</span><span class="p">]</span>
+<span class="n">rk</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"variable"</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s2">"variable"</span><span class="p">],</span> <span class="s2">"tipo"</span><span class="p">:</span> <span class="s2">"numérica"</span><span class="p">,</span> <span class="s2">"AUC univariado"</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="s2">"AUC univariado"</span><span class="p">]}</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">num_vs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()]</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cats</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">continue</span>
+    <span class="n">rk</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"variable"</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">"tipo"</span><span class="p">:</span> <span class="s2">"categórica"</span><span class="p">,</span> <span class="s2">"AUC univariado"</span><span class="p">:</span> <span class="n">categorical_auc_oof</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">y</span><span class="p">,</span> <span class="n">groups</span><span class="p">)})</span>
+<span class="n">ranking</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rk</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"AUC univariado"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ranking</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"ranking_univariado.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">ranking</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mf">5.5</span><span class="p">))</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">ranking</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">"variable"</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="s2">"AUC univariado"</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="s2">"tipo"</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"numérica"</span><span class="p">,</span> <span class="s2">"#4c78a8"</span><span class="p">,</span> <span class="s2">"#f58518"</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"gray"</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">"--"</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mf">0.48</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">t</span><span class="p">[</span><span class="s2">"AUC univariado"</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mf">0.02</span><span class="p">))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"AUC univariado (azul = numérica, naranja = categórica)"</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"15 variables con mayor señal individual"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span> <span class="n">save_figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="s2">"05_ranking_univariado.png"</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"La mayor señal individual es de **</span><span class="si">{</span><span class="n">ranking</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s1">'variable'</span><span class="p">]</span><span class="si">}</span><span class="s2">** con AUC </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">ranking</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s1">'AUC univariado'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">. "</span>
+       <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'Ninguna'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">ranking</span><span class="p">[</span><span class="s1">'AUC univariado'</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mf">0.60</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'Solo '</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="n">ranking</span><span class="p">[</span><span class="s1">'AUC univariado'</span><span class="p">]</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mf">0.60</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span><span class="si">}</span><span class="s2"> supera 0,60. "</span>
+       <span class="o">+</span> <span class="p">(</span><span class="s2">"**Ninguna variable separa por sí sola las clases**: el problema es difícil y cualquier modelo tendrá que combinar muchas señales débiles."</span>
+          <span class="k">if</span> <span class="n">ranking</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s1">'AUC univariado'</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.75</span> <span class="k">else</span>
+          <span class="s2">"Hay variables con señal individual fuerte: se revisan en el capítulo 7 por si son fuga de datos."</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>tipo</th>
+      <th>AUC univariado</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>number_inpatient</td>
+      <td>numérica</td>
+      <td>0.6096</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>discharge_disposition_id</td>
+      <td>categórica</td>
+      <td>0.5748</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>num_medications</td>
+      <td>numérica</td>
+      <td>0.5431</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>time_in_hospital</td>
+      <td>numérica</td>
+      <td>0.5429</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>number_diagnoses</td>
+      <td>numérica</td>
+      <td>0.5406</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>number_emergency</td>
+      <td>numérica</td>
+      <td>0.5328</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>insulin</td>
+      <td>categórica</td>
+      <td>0.5309</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>medical_specialty</td>
+      <td>categórica</td>
+      <td>0.5286</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>number_outpatient</td>
+      <td>numérica</td>
+      <td>0.5226</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>age</td>
+      <td>categórica</td>
+      <td>0.5219</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>diag_1_grupo</td>
+      <td>categórica</td>
+      <td>0.5207</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>age_mid</td>
+      <td>numérica</td>
+      <td>0.5176</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>num_lab_procedures</td>
+      <td>numérica</td>
+      <td>0.5176</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>diag_3_grupo</td>
+      <td>categórica</td>
+      <td>0.5151</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>payer_code</td>
+      <td>categórica</td>
+      <td>0.5113</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><img alt="../_images/78ca672033ed987bd3ea55be893259d414daa80381b2f2081c59ebc214f206b4.png" src="../_images/78ca672033ed987bd3ea55be893259d414daa80381b2f2081c59ebc214f206b4.png" />
+<p>La mayor señal individual es de <strong>number_inpatient</strong> con AUC 0,610. Solo 1 supera 0,60. <strong>Ninguna variable separa por sí sola las clases</strong>: el problema es difícil y cualquier modelo tendrá que combinar muchas señales débiles.</p>
+</div>
+</div>
+</section>
+<section id="informacion-mutua">
+<h2>Información mutua<a class="headerlink" href="#informacion-mutua" title="Link to this heading">#</a></h2>
+<p>La información mutua detecta dependencias potencialmente no lineales. Se
+calcula sobre todo training, sin usar test ni muestrear filas. Su escala no
+implica causalidad y se utiliza como ranking exploratorio.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.feature_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">mutual_info_classif</span>
+
+<span class="n">mi_rows</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">num_cols</span><span class="p">:</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">())</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">mutual_info_classif</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">discrete_features</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">mi_rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"variable"</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">"tipo"</span><span class="p">:</span> <span class="s2">"numérica"</span><span class="p">,</span> <span class="s2">"información_mutua"</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">cats</span><span class="p">:</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">factorize</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">"object"</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">frame</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">(),</span> <span class="s2">"Missing"</span><span class="p">),</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">mutual_info_classif</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">discrete_features</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">mi_rows</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"variable"</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">"tipo"</span><span class="p">:</span> <span class="s2">"categórica"</span><span class="p">,</span> <span class="s2">"información_mutua"</span><span class="p">:</span> <span class="n">value</span><span class="p">})</span>
+<span class="n">mi_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">mi_rows</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"información_mutua"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">mi_table</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"informacion_mutua.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">mi_table</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+<span class="n">md_out</span><span class="p">(</span><span class="s2">"Las mayores estimaciones corresponden a "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">variable</span><span class="si">}</span><span class="s2">` (</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">información_mutua</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">)"</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">mi_table</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()</span>
+<span class="p">)</span> <span class="o">+</span> <span class="s2">". El ranking es complementario a AUC y V de Cramér; no demuestra efecto causal ni fuga."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>tipo</th>
+      <th>información_mutua</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>number_diagnoses</td>
+      <td>numérica</td>
+      <td>0.00904</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>number_inpatient</td>
+      <td>numérica</td>
+      <td>0.00773</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>discharge_disposition_id</td>
+      <td>categórica</td>
+      <td>0.00708</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>num_lab_procedures</td>
+      <td>numérica</td>
+      <td>0.00595</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>num_medications</td>
+      <td>numérica</td>
+      <td>0.00531</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>time_in_hospital</td>
+      <td>numérica</td>
+      <td>0.00455</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>num_procedures</td>
+      <td>numérica</td>
+      <td>0.00265</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>number_emergency</td>
+      <td>numérica</td>
+      <td>0.00255</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>age_mid</td>
+      <td>numérica</td>
+      <td>0.00231</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>medical_specialty</td>
+      <td>categórica</td>
+      <td>0.00194</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>insulin</td>
+      <td>categórica</td>
+      <td>0.00087</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>age</td>
+      <td>categórica</td>
+      <td>0.00067</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>payer_code</td>
+      <td>categórica</td>
+      <td>0.00052</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>diag_1_grupo</td>
+      <td>categórica</td>
+      <td>0.00045</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>diag_3_grupo</td>
+      <td>categórica</td>
+      <td>0.00045</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><p>Las mayores estimaciones corresponden a <code class="docutils literal notranslate"><span class="pre">number_diagnoses</span></code> (0.0090), <code class="docutils literal notranslate"><span class="pre">number_inpatient</span></code> (0.0077), <code class="docutils literal notranslate"><span class="pre">discharge_disposition_id</span></code> (0.0071). El ranking es complementario a AUC y V de Cramér; no demuestra efecto causal ni fuga.</p>
+</div>
+</div>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./notebooks"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="04_eda_univariado.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">4. Análisis univariado</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="06_eda_multivariado.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">6. EDA multivariado</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#variables-numericas-frente-al-objetivo">Variables numéricas frente al objetivo</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#variables-categoricas-frente-al-objetivo">Variables categóricas frente al objetivo</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#relaciones-entre-predictoras-ejemplos-representativos">Relaciones entre predictoras: ejemplos representativos</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#ranking-unificado-de-variables-seleccion-preliminar">Ranking unificado de variables (selección preliminar)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#informacion-mutua">Información mutua</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Proyecto de Machine Learning — Maestría en Ingeniería Industrial
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

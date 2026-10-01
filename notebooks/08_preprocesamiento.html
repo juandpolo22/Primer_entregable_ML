@@ -1,0 +1,990 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>8. Preprocesamiento y Pipeline &#8212; Predicción de reingreso hospitalario antes de 30 días</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=eba8b062" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'notebooks/08_preprocesamiento';</script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="9. Modelo base: línea base trivial y regresión logística" href="09_modelo_base.html" />
+    <link rel="prev" title="7. Auditoría de data leakage" href="07_data_leakage.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="01_introduccion.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Predicción de reingreso hospitalario antes de 30 días - Home"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Predicción de reingreso hospitalario antes de 30 días - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="01_introduccion.html">
+                    1. Introducción: reingreso hospitalario antes de 30 días
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="02_datos.html">2. La base de datos: tamaño, calidad y representatividad</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_eda_objetivo.html">3. EDA de la variable objetivo: reingreso antes de 30 días</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_eda_univariado.html">4. Análisis univariado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_eda_bivariado.html">5. Análisis bivariado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_eda_multivariado.html">6. EDA multivariado</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_data_leakage.html">7. Auditoría de data leakage</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">8. Preprocesamiento y Pipeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_modelo_base.html">9. Modelo base: línea base trivial y regresión logística</a></li>
+<li class="toctree-l1"><a class="reference internal" href="10_conclusiones.html">10. Conclusiones, limitaciones y checklist</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/notebooks/08_preprocesamiento.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>8. Preprocesamiento y Pipeline</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#poblacion-de-modelado">Población de modelado</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#decisiones-de-limpieza">Decisiones de limpieza</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#transformacion-de-los-conteos-con-cola-larga-log1p-si-o-no">Transformación de los conteos con cola larga: ¿<code class="docutils literal notranslate"><span class="pre">log1p</span></code> sí o no?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pipeline-final">Pipeline final</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#resumen-de-decisiones-de-preprocesamiento">Resumen de decisiones de preprocesamiento</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="preprocesamiento-y-pipeline">
+<h1>8. Preprocesamiento y Pipeline<a class="headerlink" href="#preprocesamiento-y-pipeline" title="Link to this heading">#</a></h1>
+<p><strong>Qué hacemos:</strong> decidir, <strong>solo con el entrenamiento</strong>, cómo limpiar, transformar y codificar las variables, y empaquetar todo en un
+<code class="docutils literal notranslate"><span class="pre">Pipeline</span></code> de scikit-learn que se ajusta dentro de cada pliegue de la validación cruzada.</p>
+<p><strong>Por qué:</strong> si la imputación, el escalado o la codificación se calculan con todos los datos, la información de los pliegues de validación (o de la
+prueba) se filtra al entrenamiento. Con el <code class="docutils literal notranslate"><span class="pre">Pipeline</span></code> cada pliegue aprende sus propios parámetros.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span><span class="o">,</span><span class="w"> </span><span class="nn">sys</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Markdown</span><span class="p">,</span> <span class="n">display</span>
+
+<span class="n">project_root</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">"_config.yml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">project_root</span><span class="o">.</span><span class="n">parent</span> <span class="o">==</span> <span class="n">project_root</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">"No se encontró _config.yml. Ejecuta el notebook dentro de la carpeta del libro."</span><span class="p">)</span>
+    <span class="n">project_root</span> <span class="o">=</span> <span class="n">project_root</span><span class="o">.</span><span class="n">parent</span>
+<span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">project_root</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">_folder</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"tables"</span><span class="p">,</span> <span class="s2">"figures"</span><span class="p">):</span>          <span class="c1"># se crean si no existen</span>
+    <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">_folder</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.project_utils</span><span class="w"> </span><span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">configure_plots</span><span class="p">()</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.max_columns"</span><span class="p">,</span> <span class="mi">80</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.width"</span><span class="p">,</span> <span class="mi">170</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s2">"display.max_colwidth"</span><span class="p">,</span> <span class="mi">70</span><span class="p">)</span>
+<span class="n">TABLES</span> <span class="o">=</span> <span class="n">project_root</span> <span class="o">/</span> <span class="s2">"tables"</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">md_out</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="n">display</span><span class="p">(</span><span class="n">Markdown</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+
+<span class="c1"># El OneHotEncoder usa handle_unknown="infrequent_if_exist": una categoría que aparece en validación/prueba y no en el ajuste</span>
+<span class="c1"># se codifica como ceros (comportamiento deseado y documentado). Se silencia solo ese aviso, también en los procesos de joblib.</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="n">_msg_onehot</span> <span class="o">=</span> <span class="s2">"Found unknown categories"</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">_msg_onehot</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">UserWarning</span><span class="p">)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"PYTHONWARNINGS"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">","</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"PYTHONWARNINGS"</span><span class="p">,</span> <span class="s2">""</span><span class="p">),</span> <span class="sa">f</span><span class="s2">"ignore:</span><span class="si">{</span><span class="n">_msg_onehot</span><span class="si">}</span><span class="s2">:UserWarning"</span><span class="p">]))</span>
+
+<span class="n">pop</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"decision_poblacion.csv"</span><span class="p">)</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">excluir</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">pop</span><span class="p">[</span><span class="s2">"excluir_terminales"</span><span class="p">])</span>
+<span class="n">train</span> <span class="o">=</span> <span class="n">load_train</span><span class="p">(</span><span class="n">include_terminal</span><span class="o">=</span><span class="ow">not</span> <span class="n">excluir</span><span class="p">)</span>
+<span class="n">frame</span> <span class="o">=</span> <span class="n">prepare_frame</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="n">y</span><span class="p">,</span> <span class="n">groups</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">TARGET</span><span class="p">],</span> <span class="n">frame</span><span class="p">[</span><span class="n">GROUP_COL</span><span class="p">]</span>
+<span class="n">cols</span> <span class="o">=</span> <span class="n">choose_columns</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="poblacion-de-modelado">
+<h2>Población de modelado<a class="headerlink" href="#poblacion-de-modelado" title="Link to this heading">#</a></h2>
+<p>La decisión del capítulo 7 se aplica aquí: los encuentros con alta por fallecimiento u hospicio quedan fuera si su tasa de reingreso es
+prácticamente cero.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- **Altas terminales excluidas:** </span><span class="si">{</span><span class="s1">'sí'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">excluir</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'no'</span><span class="si">}</span><span class="s2"> "</span>
+       <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">pop</span><span class="p">[</span><span class="s1">'n_excluidos_train'</span><span class="p">]),</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">excluir</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'0'</span><span class="si">}</span><span class="s2"> encuentros de entrenamiento)</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="sa">f</span><span class="s2">"- **Encuentros de modelado (entrenamiento):** </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">),</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">; pacientes: </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">groups</span><span class="o">.</span><span class="n">nunique</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+       <span class="sa">f</span><span class="s2">"- **Tasa de reingreso en la población de modelado:** </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">pct</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<ul class="simple">
+<li><p><strong>Altas terminales excluidas:</strong> sí (1.940 encuentros de entrenamiento)</p></li>
+<li><p><strong>Encuentros de modelado (entrenamiento):</strong> 79.473; pacientes: 55.990</p></li>
+<li><p><strong>Tasa de reingreso en la población de modelado:</strong> 11,3 %</p></li>
+</ul>
+</div>
+</div>
+</section>
+<section id="decisiones-de-limpieza">
+<h2>Decisiones de limpieza<a class="headerlink" href="#decisiones-de-limpieza" title="Link to this heading">#</a></h2>
+<p>Las decisiones se fijan usando únicamente training:</p>
+<ol class="arabic simple">
+<li><p>Excluir <code class="docutils literal notranslate"><span class="pre">encounter_id</span></code>, <code class="docutils literal notranslate"><span class="pre">patient_nbr</span></code>, <code class="docutils literal notranslate"><span class="pre">readmitted</span></code> y <code class="docutils literal notranslate"><span class="pre">reingreso_30d</span></code> de X.</p></li>
+<li><p>Excluir constantes.</p></li>
+<li><p>Excluir columnas con más de 70 % de faltantes. Este es un <strong>umbral definido
+por el proyecto</strong>, no una regla del profesor, y evita modelar variables
+observadas en menos de 30 % de los encuentros.</p></li>
+<li><p>Derivar <code class="docutils literal notranslate"><span class="pre">age_mid</span></code> y grupos CIE-9 mediante reglas fijas.</p></li>
+<li><p>Imputar, agrupar categorías raras, codificar y escalar dentro del Pipeline.</p></li>
+<li><p>Usar <code class="docutils literal notranslate"><span class="pre">OneHotEncoder(drop='first')</span></code>, de modo que cada coeficiente categórico
+tenga una categoría de referencia explícita.</p></li>
+</ol>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">quitadas</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([{</span><span class="s2">"variable"</span><span class="p">:</span> <span class="n">k</span><span class="p">,</span> <span class="s2">"motivo"</span><span class="p">:</span> <span class="n">v</span><span class="p">}</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">[</span><span class="s2">"dropped"</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()])</span>
+<span class="n">display</span><span class="p">(</span><span class="n">quitadas</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">quitadas</span><span class="p">)</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"resultado"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"ninguna columna eliminada"</span><span class="p">]}))</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Se eliminan **</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="s1">'dropped'</span><span class="p">])</span><span class="si">}</span><span class="s2">** columnas por ser constantes o tener demasiados faltantes. "</span>
+       <span class="sa">f</span><span class="s2">"Quedan **</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="s1">'num_lin'</span><span class="p">])</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="s1">'num_log'</span><span class="p">])</span><span class="si">}</span><span class="s2">** numéricas y **</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="s1">'cat'</span><span class="p">])</span><span class="si">}</span><span class="s2">** categóricas."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>motivo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>weight</td>
+      <td>faltantes &gt; 70 %</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>examide</td>
+      <td>constante</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>citoglipton</td>
+      <td>constante</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><p>Se eliminan <strong>3</strong> columnas por ser constantes o tener demasiados faltantes. Quedan <strong>9</strong> numéricas y <strong>35</strong> categóricas.</p>
+</div>
+</div>
+</section>
+<section id="transformacion-de-los-conteos-con-cola-larga-log1p-si-o-no">
+<h2>Transformación de los conteos con cola larga: ¿<code class="docutils literal notranslate"><span class="pre">log1p</span></code> sí o no?<a class="headerlink" href="#transformacion-de-los-conteos-con-cola-larga-log1p-si-o-no" title="Link to this heading">#</a></h2>
+<p>Las tres variables de visitas previas son muy asimétricas. Se compara, con <strong>validación cruzada agrupada por paciente dentro del entrenamiento</strong>,
+el AUC del modelo con y sin <code class="docutils literal notranslate"><span class="pre">log1p</span></code> en esas variables.</p>
+<p><strong>Criterio fijado antes de ver el resultado:</strong> se adopta <code class="docutils literal notranslate"><span class="pre">log1p</span></code> si mejora el AUC medio en al menos <strong>0,001</strong> y en <strong>4 de los 5 pliegues</strong>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">cross_validate</span>
+<span class="n">folds</span> <span class="o">=</span> <span class="n">cv_folds</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">groups</span><span class="p">)</span>
+<span class="n">todas</span> <span class="o">=</span> <span class="n">cols</span><span class="p">[</span><span class="s2">"num_lin"</span><span class="p">]</span> <span class="o">+</span> <span class="n">cols</span><span class="p">[</span><span class="s2">"num_log"</span><span class="p">]</span> <span class="o">+</span> <span class="n">cols</span><span class="p">[</span><span class="s2">"cat"</span><span class="p">]</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="n">todas</span><span class="p">]</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">auc_folds</span><span class="p">(</span><span class="n">num_lin</span><span class="p">,</span> <span class="n">num_log</span><span class="p">):</span>
+    <span class="n">pipe</span> <span class="o">=</span> <span class="n">make_model_pipeline</span><span class="p">(</span><span class="n">num_lin</span><span class="p">,</span> <span class="n">num_log</span><span class="p">,</span> <span class="n">cols</span><span class="p">[</span><span class="s2">"cat"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">pipe</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">folds</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s2">"roc_auc"</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">error_score</span><span class="o">=</span><span class="s2">"raise"</span><span class="p">)[</span><span class="s2">"test_score"</span><span class="p">]</span>
+
+<span class="n">sin_log</span> <span class="o">=</span> <span class="n">auc_folds</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="s2">"num_lin"</span><span class="p">]</span> <span class="o">+</span> <span class="n">cols</span><span class="p">[</span><span class="s2">"num_log"</span><span class="p">],</span> <span class="p">[])</span>
+<span class="n">con_log</span> <span class="o">=</span> <span class="n">auc_folds</span><span class="p">(</span><span class="n">cols</span><span class="p">[</span><span class="s2">"num_lin"</span><span class="p">],</span> <span class="n">cols</span><span class="p">[</span><span class="s2">"num_log"</span><span class="p">])</span>
+<span class="n">dif</span> <span class="o">=</span> <span class="n">con_log</span> <span class="o">-</span> <span class="n">sin_log</span>
+<span class="n">usar_log</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">dif</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mf">0.001</span> <span class="ow">and</span> <span class="p">(</span><span class="n">dif</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">comp</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"pliegue"</span><span class="p">:</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">folds</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="s2">"AUC sin log1p"</span><span class="p">:</span> <span class="n">sin_log</span><span class="p">,</span> <span class="s2">"AUC con log1p"</span><span class="p">:</span> <span class="n">con_log</span><span class="p">,</span> <span class="s2">"diferencia"</span><span class="p">:</span> <span class="n">dif</span><span class="p">})</span>
+<span class="n">display</span><span class="p">(</span><span class="n">comp</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"AUC medio **sin** `log1p`: </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">sin_log</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="si">}</span><span class="s2">; **con** `log1p`: </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">con_log</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="si">}</span><span class="s2">; diferencia media </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">dif</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="si">}</span><span class="s2">, a favor en "</span>
+       <span class="sa">f</span><span class="s2">"**</span><span class="si">{</span><span class="nb">int</span><span class="p">((</span><span class="n">dif</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="si">}</span><span class="s2"> de </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">dif</span><span class="p">)</span><span class="si">}</span><span class="s2">** pliegues. **Decisión:** "</span> <span class="o">+</span>
+       <span class="p">(</span><span class="s2">"se **usa `log1p`** en las variables de conteo con cola larga."</span> <span class="k">if</span> <span class="n">usar_log</span> <span class="k">else</span> <span class="s2">"**no se usa `log1p`**: la mejora no cumple el criterio y se mantiene la escala original."</span><span class="p">))</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([{</span><span class="s2">"usar_log1p"</span><span class="p">:</span> <span class="n">usar_log</span><span class="p">,</span> <span class="s2">"auc_sin_log"</span><span class="p">:</span> <span class="n">sin_log</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="s2">"auc_con_log"</span><span class="p">:</span> <span class="n">con_log</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="s2">"diferencia_media"</span><span class="p">:</span> <span class="n">dif</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+               <span class="s2">"folds_a_favor"</span><span class="p">:</span> <span class="nb">int</span><span class="p">((</span><span class="n">dif</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span> <span class="s2">"criterio"</span><span class="p">:</span> <span class="s2">"dif media &gt;= 0,001 y &gt;= 4 de 5 pliegues"</span><span class="p">}])</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"decision_transformacion.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="n">final_cols</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"num_lin"</span><span class="p">:</span> <span class="n">cols</span><span class="p">[</span><span class="s2">"num_lin"</span><span class="p">]</span> <span class="o">+</span> <span class="p">([]</span> <span class="k">if</span> <span class="n">usar_log</span> <span class="k">else</span> <span class="n">cols</span><span class="p">[</span><span class="s2">"num_log"</span><span class="p">]),</span> <span class="s2">"num_log"</span><span class="p">:</span> <span class="n">cols</span><span class="p">[</span><span class="s2">"num_log"</span><span class="p">]</span> <span class="k">if</span> <span class="n">usar_log</span> <span class="k">else</span> <span class="p">[],</span> <span class="s2">"cat"</span><span class="p">:</span> <span class="n">cols</span><span class="p">[</span><span class="s2">"cat"</span><span class="p">]}</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([{</span><span class="s2">"variable"</span><span class="p">:</span> <span class="n">v</span><span class="p">,</span> <span class="s2">"grupo"</span><span class="p">:</span> <span class="n">g</span><span class="p">}</span> <span class="k">for</span> <span class="n">g</span><span class="p">,</span> <span class="n">vs</span> <span class="ow">in</span> <span class="n">final_cols</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vs</span><span class="p">])</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"columnas_modelo.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>pliegue</th>
+      <th>AUC sin log1p</th>
+      <th>AUC con log1p</th>
+      <th>diferencia</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>0.6596</td>
+      <td>0.6581</td>
+      <td>-0.0015</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2</td>
+      <td>0.6560</td>
+      <td>0.6581</td>
+      <td>0.0021</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3</td>
+      <td>0.6605</td>
+      <td>0.6648</td>
+      <td>0.0043</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>4</td>
+      <td>0.6699</td>
+      <td>0.6720</td>
+      <td>0.0021</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>5</td>
+      <td>0.6571</td>
+      <td>0.6599</td>
+      <td>0.0028</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><p>AUC medio <strong>sin</strong> <code class="docutils literal notranslate"><span class="pre">log1p</span></code>: 0,6606; <strong>con</strong> <code class="docutils literal notranslate"><span class="pre">log1p</span></code>: 0,6626; diferencia media 0,0020, a favor en <strong>4 de 5</strong> pliegues. <strong>Decisión:</strong> se <strong>usa <code class="docutils literal notranslate"><span class="pre">log1p</span></code></strong> en las variables de conteo con cola larga.</p>
+</div>
+</div>
+</section>
+<section id="pipeline-final">
+<h2>Pipeline final<a class="headerlink" href="#pipeline-final" title="Link to this heading">#</a></h2>
+<p>El <code class="docutils literal notranslate"><span class="pre">ColumnTransformer</span></code> tiene ramas numéricas (mediana, transformación cuando
+proceda y escalado) y categóricas (<code class="docutils literal notranslate"><span class="pre">Missing</span></code>, agrupación de niveles infrecuentes
+y OneHotEncoder con primera categoría como referencia). Todos los parámetros se
+aprenden dentro de cada fold. Después se ajusta la regresión logística base.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span> <span class="o">=</span> <span class="n">make_model_pipeline</span><span class="p">(</span><span class="n">final_cols</span><span class="p">[</span><span class="s2">"num_lin"</span><span class="p">],</span> <span class="n">final_cols</span><span class="p">[</span><span class="s2">"num_log"</span><span class="p">],</span> <span class="n">final_cols</span><span class="p">[</span><span class="s2">"cat"</span><span class="p">])</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">nombres</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">named_steps</span><span class="p">[</span><span class="s2">"prep"</span><span class="p">]</span><span class="o">.</span><span class="n">get_feature_names_out</span><span class="p">()</span>
+<span class="n">por_rama</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">n</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"__"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nombres</span><span class="p">])</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Tras el ajuste en el entrenamiento, el Pipeline produce **</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">nombres</span><span class="p">)</span><span class="si">}</span><span class="s2"> columnas**: "</span>
+       <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">por_rama</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="o">+</span> <span class="s2">".</span><span class="se">\n\n</span><span class="s2">"</span>
+       <span class="s2">"Ejemplos de columnas creadas: "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">`"</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">nombres</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span> <span class="o">+</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nombres</span> <span class="k">if</span> <span class="s1">'infrequent'</span> <span class="ow">in</span> <span class="n">n</span><span class="p">][:</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="s2">"."</span><span class="p">)</span>
+<span class="n">referencias</span> <span class="o">=</span> <span class="n">onehot_reference_table</span><span class="p">(</span><span class="n">pipe</span><span class="p">,</span> <span class="n">final_cols</span><span class="p">[</span><span class="s2">"cat"</span><span class="p">])</span>
+<span class="n">referencias</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"categorias_referencia_onehot.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">referencias</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">12</span><span class="p">))</span>
+<span class="n">pipe</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<p>Tras el ajuste en el entrenamiento, el Pipeline produce <strong>120 columnas</strong>: cat = 111, num = 6, numlog = 3.</p>
+<p>Ejemplos de columnas creadas: <code class="docutils literal notranslate"><span class="pre">num__time_in_hospital</span></code>, <code class="docutils literal notranslate"><span class="pre">num__num_lab_procedures</span></code>, <code class="docutils literal notranslate"><span class="pre">num__num_procedures</span></code>, <code class="docutils literal notranslate"><span class="pre">cat__race_infrequent_sklearn</span></code>, <code class="docutils literal notranslate"><span class="pre">cat__gender_infrequent_sklearn</span></code>.</p>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>variable</th>
+      <th>categoría_referencia</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>race</td>
+      <td>AfricanAmerican</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>gender</td>
+      <td>Female</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>admission_type_id</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>discharge_disposition_id</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>admission_source_id</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>payer_code</td>
+      <td>BC</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>medical_specialty</td>
+      <td>Cardiology</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>max_glu_serum</td>
+      <td>&gt;200</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>A1Cresult</td>
+      <td>&gt;7</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>metformin</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>repaglinide</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>nateglinide</td>
+      <td>No</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><div class="output text_html"><style>#sk-container-id-1 {color: black;}#sk-container-id-1 pre{padding: 0;}#sk-container-id-1 div.sk-toggleable {background-color: white;}#sk-container-id-1 label.sk-toggleable__label {cursor: pointer;display: block;width: 100%;margin-bottom: 0;padding: 0.3em;box-sizing: border-box;text-align: center;}#sk-container-id-1 label.sk-toggleable__label-arrow:before {content: "▸";float: left;margin-right: 0.25em;color: #696969;}#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {color: black;}#sk-container-id-1 div.sk-estimator:hover label.sk-toggleable__label-arrow:before {color: black;}#sk-container-id-1 div.sk-toggleable__content {max-height: 0;max-width: 0;overflow: hidden;text-align: left;background-color: #f0f8ff;}#sk-container-id-1 div.sk-toggleable__content pre {margin: 0.2em;color: black;border-radius: 0.25em;background-color: #f0f8ff;}#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {max-height: 200px;max-width: 100%;overflow: auto;}#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {content: "▾";}#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 input.sk-hidden--visually {border: 0;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;width: 1px;}#sk-container-id-1 div.sk-estimator {font-family: monospace;background-color: #f0f8ff;border: 1px dotted black;border-radius: 0.25em;box-sizing: border-box;margin-bottom: 0.5em;}#sk-container-id-1 div.sk-estimator:hover {background-color: #d4ebff;}#sk-container-id-1 div.sk-parallel-item::after {content: "";width: 100%;border-bottom: 1px solid gray;flex-grow: 1;}#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-1 div.sk-serial::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: 0;}#sk-container-id-1 div.sk-serial {display: flex;flex-direction: column;align-items: center;background-color: white;padding-right: 0.2em;padding-left: 0.2em;position: relative;}#sk-container-id-1 div.sk-item {position: relative;z-index: 1;}#sk-container-id-1 div.sk-parallel {display: flex;align-items: stretch;justify-content: center;background-color: white;position: relative;}#sk-container-id-1 div.sk-item::before, #sk-container-id-1 div.sk-parallel-item::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: -1;}#sk-container-id-1 div.sk-parallel-item {display: flex;flex-direction: column;z-index: 1;position: relative;background-color: white;}#sk-container-id-1 div.sk-parallel-item:first-child::after {align-self: flex-end;width: 50%;}#sk-container-id-1 div.sk-parallel-item:last-child::after {align-self: flex-start;width: 50%;}#sk-container-id-1 div.sk-parallel-item:only-child::after {width: 0;}#sk-container-id-1 div.sk-dashed-wrapped {border: 1px dashed gray;margin: 0 0.4em 0.5em 0.4em;box-sizing: border-box;padding-bottom: 0.4em;background-color: white;}#sk-container-id-1 div.sk-label label {font-family: monospace;font-weight: bold;display: inline-block;line-height: 1.2em;}#sk-container-id-1 div.sk-label-container {text-align: center;}#sk-container-id-1 div.sk-container {/* jupyter's `normalize.less` sets `[hidden] { display: none; }` but bootstrap.min.css set `[hidden] { display: none !important; }` so we also need the `!important` here to be able to override the default hidden behavior on the sphinx rendered scikit-learn.org. See: https://github.com/scikit-learn/scikit-learn/issues/21755 */display: inline-block !important;position: relative;}#sk-container-id-1 div.sk-text-repr-fallback {display: none;}</style><div id="sk-container-id-1" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>Pipeline(steps=[(&#x27;prep&#x27;,
+                 ColumnTransformer(transformers=[(&#x27;num&#x27;,
+                                                  Pipeline(steps=[(&#x27;imp&#x27;,
+                                                                   SimpleImputer(strategy=&#x27;median&#x27;)),
+                                                                  (&#x27;sc&#x27;,
+                                                                   StandardScaler())]),
+                                                  [&#x27;time_in_hospital&#x27;,
+                                                   &#x27;num_lab_procedures&#x27;,
+                                                   &#x27;num_procedures&#x27;,
+                                                   &#x27;num_medications&#x27;,
+                                                   &#x27;number_diagnoses&#x27;,
+                                                   &#x27;age_mid&#x27;]),
+                                                 (&#x27;numlog&#x27;,
+                                                  Pipeline(steps=[(&#x27;imp&#x27;,
+                                                                   SimpleImputer(strategy=&#x27;median&#x27;)),
+                                                                  (&#x27;log&#x27;,
+                                                                   FunctionTransformer(fea...
+                                                   &#x27;chlorpropamide&#x27;,
+                                                   &#x27;glimepiride&#x27;,
+                                                   &#x27;acetohexamide&#x27;, &#x27;glipizide&#x27;,
+                                                   &#x27;glyburide&#x27;, &#x27;tolbutamide&#x27;,
+                                                   &#x27;pioglitazone&#x27;,
+                                                   &#x27;rosiglitazone&#x27;, &#x27;acarbose&#x27;,
+                                                   &#x27;miglitol&#x27;, &#x27;troglitazone&#x27;,
+                                                   &#x27;tolazamide&#x27;, &#x27;insulin&#x27;,
+                                                   &#x27;glyburide-metformin&#x27;,
+                                                   &#x27;glipizide-metformin&#x27;,
+                                                   &#x27;glimepiride-pioglitazone&#x27;,
+                                                   &#x27;metformin-rosiglitazone&#x27;,
+                                                   &#x27;metformin-pioglitazone&#x27;, ...])])),
+                (&#x27;clf&#x27;, LogisticRegression(max_iter=2000, random_state=42))])</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br />On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox" ><label for="sk-estimator-id-1" class="sk-toggleable__label sk-toggleable__label-arrow">Pipeline</label><div class="sk-toggleable__content"><pre>Pipeline(steps=[(&#x27;prep&#x27;,
+                 ColumnTransformer(transformers=[(&#x27;num&#x27;,
+                                                  Pipeline(steps=[(&#x27;imp&#x27;,
+                                                                   SimpleImputer(strategy=&#x27;median&#x27;)),
+                                                                  (&#x27;sc&#x27;,
+                                                                   StandardScaler())]),
+                                                  [&#x27;time_in_hospital&#x27;,
+                                                   &#x27;num_lab_procedures&#x27;,
+                                                   &#x27;num_procedures&#x27;,
+                                                   &#x27;num_medications&#x27;,
+                                                   &#x27;number_diagnoses&#x27;,
+                                                   &#x27;age_mid&#x27;]),
+                                                 (&#x27;numlog&#x27;,
+                                                  Pipeline(steps=[(&#x27;imp&#x27;,
+                                                                   SimpleImputer(strategy=&#x27;median&#x27;)),
+                                                                  (&#x27;log&#x27;,
+                                                                   FunctionTransformer(fea...
+                                                   &#x27;chlorpropamide&#x27;,
+                                                   &#x27;glimepiride&#x27;,
+                                                   &#x27;acetohexamide&#x27;, &#x27;glipizide&#x27;,
+                                                   &#x27;glyburide&#x27;, &#x27;tolbutamide&#x27;,
+                                                   &#x27;pioglitazone&#x27;,
+                                                   &#x27;rosiglitazone&#x27;, &#x27;acarbose&#x27;,
+                                                   &#x27;miglitol&#x27;, &#x27;troglitazone&#x27;,
+                                                   &#x27;tolazamide&#x27;, &#x27;insulin&#x27;,
+                                                   &#x27;glyburide-metformin&#x27;,
+                                                   &#x27;glipizide-metformin&#x27;,
+                                                   &#x27;glimepiride-pioglitazone&#x27;,
+                                                   &#x27;metformin-rosiglitazone&#x27;,
+                                                   &#x27;metformin-pioglitazone&#x27;, ...])])),
+                (&#x27;clf&#x27;, LogisticRegression(max_iter=2000, random_state=42))])</pre></div></div></div><div class="sk-serial"><div class="sk-item sk-dashed-wrapped"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-2" type="checkbox" ><label for="sk-estimator-id-2" class="sk-toggleable__label sk-toggleable__label-arrow">prep: ColumnTransformer</label><div class="sk-toggleable__content"><pre>ColumnTransformer(transformers=[(&#x27;num&#x27;,
+                                 Pipeline(steps=[(&#x27;imp&#x27;,
+                                                  SimpleImputer(strategy=&#x27;median&#x27;)),
+                                                 (&#x27;sc&#x27;, StandardScaler())]),
+                                 [&#x27;time_in_hospital&#x27;, &#x27;num_lab_procedures&#x27;,
+                                  &#x27;num_procedures&#x27;, &#x27;num_medications&#x27;,
+                                  &#x27;number_diagnoses&#x27;, &#x27;age_mid&#x27;]),
+                                (&#x27;numlog&#x27;,
+                                 Pipeline(steps=[(&#x27;imp&#x27;,
+                                                  SimpleImputer(strategy=&#x27;median&#x27;)),
+                                                 (&#x27;log&#x27;,
+                                                  FunctionTransformer(feature_names_out=&#x27;one-to-o...
+                                  &#x27;A1Cresult&#x27;, &#x27;metformin&#x27;, &#x27;repaglinide&#x27;,
+                                  &#x27;nateglinide&#x27;, &#x27;chlorpropamide&#x27;,
+                                  &#x27;glimepiride&#x27;, &#x27;acetohexamide&#x27;, &#x27;glipizide&#x27;,
+                                  &#x27;glyburide&#x27;, &#x27;tolbutamide&#x27;, &#x27;pioglitazone&#x27;,
+                                  &#x27;rosiglitazone&#x27;, &#x27;acarbose&#x27;, &#x27;miglitol&#x27;,
+                                  &#x27;troglitazone&#x27;, &#x27;tolazamide&#x27;, &#x27;insulin&#x27;,
+                                  &#x27;glyburide-metformin&#x27;, &#x27;glipizide-metformin&#x27;,
+                                  &#x27;glimepiride-pioglitazone&#x27;,
+                                  &#x27;metformin-rosiglitazone&#x27;,
+                                  &#x27;metformin-pioglitazone&#x27;, ...])])</pre></div></div></div><div class="sk-parallel"><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-3" type="checkbox" ><label for="sk-estimator-id-3" class="sk-toggleable__label sk-toggleable__label-arrow">num</label><div class="sk-toggleable__content"><pre>[&#x27;time_in_hospital&#x27;, &#x27;num_lab_procedures&#x27;, &#x27;num_procedures&#x27;, &#x27;num_medications&#x27;, &#x27;number_diagnoses&#x27;, &#x27;age_mid&#x27;]</pre></div></div></div><div class="sk-serial"><div class="sk-item"><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-4" type="checkbox" ><label for="sk-estimator-id-4" class="sk-toggleable__label sk-toggleable__label-arrow">SimpleImputer</label><div class="sk-toggleable__content"><pre>SimpleImputer(strategy=&#x27;median&#x27;)</pre></div></div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-5" type="checkbox" ><label for="sk-estimator-id-5" class="sk-toggleable__label sk-toggleable__label-arrow">StandardScaler</label><div class="sk-toggleable__content"><pre>StandardScaler()</pre></div></div></div></div></div></div></div></div><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-6" type="checkbox" ><label for="sk-estimator-id-6" class="sk-toggleable__label sk-toggleable__label-arrow">numlog</label><div class="sk-toggleable__content"><pre>[&#x27;number_outpatient&#x27;, &#x27;number_emergency&#x27;, &#x27;number_inpatient&#x27;]</pre></div></div></div><div class="sk-serial"><div class="sk-item"><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-7" type="checkbox" ><label for="sk-estimator-id-7" class="sk-toggleable__label sk-toggleable__label-arrow">SimpleImputer</label><div class="sk-toggleable__content"><pre>SimpleImputer(strategy=&#x27;median&#x27;)</pre></div></div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-8" type="checkbox" ><label for="sk-estimator-id-8" class="sk-toggleable__label sk-toggleable__label-arrow">FunctionTransformer</label><div class="sk-toggleable__content"><pre>FunctionTransformer(feature_names_out=&#x27;one-to-one&#x27;, func=&lt;ufunc &#x27;log1p&#x27;&gt;)</pre></div></div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-9" type="checkbox" ><label for="sk-estimator-id-9" class="sk-toggleable__label sk-toggleable__label-arrow">StandardScaler</label><div class="sk-toggleable__content"><pre>StandardScaler()</pre></div></div></div></div></div></div></div></div><div class="sk-parallel-item"><div class="sk-item"><div class="sk-label-container"><div class="sk-label sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-10" type="checkbox" ><label for="sk-estimator-id-10" class="sk-toggleable__label sk-toggleable__label-arrow">cat</label><div class="sk-toggleable__content"><pre>[&#x27;race&#x27;, &#x27;gender&#x27;, &#x27;admission_type_id&#x27;, &#x27;discharge_disposition_id&#x27;, &#x27;admission_source_id&#x27;, &#x27;payer_code&#x27;, &#x27;medical_specialty&#x27;, &#x27;max_glu_serum&#x27;, &#x27;A1Cresult&#x27;, &#x27;metformin&#x27;, &#x27;repaglinide&#x27;, &#x27;nateglinide&#x27;, &#x27;chlorpropamide&#x27;, &#x27;glimepiride&#x27;, &#x27;acetohexamide&#x27;, &#x27;glipizide&#x27;, &#x27;glyburide&#x27;, &#x27;tolbutamide&#x27;, &#x27;pioglitazone&#x27;, &#x27;rosiglitazone&#x27;, &#x27;acarbose&#x27;, &#x27;miglitol&#x27;, &#x27;troglitazone&#x27;, &#x27;tolazamide&#x27;, &#x27;insulin&#x27;, &#x27;glyburide-metformin&#x27;, &#x27;glipizide-metformin&#x27;, &#x27;glimepiride-pioglitazone&#x27;, &#x27;metformin-rosiglitazone&#x27;, &#x27;metformin-pioglitazone&#x27;, &#x27;change&#x27;, &#x27;diabetesMed&#x27;, &#x27;diag_1_grupo&#x27;, &#x27;diag_2_grupo&#x27;, &#x27;diag_3_grupo&#x27;]</pre></div></div></div><div class="sk-serial"><div class="sk-item"><div class="sk-serial"><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-11" type="checkbox" ><label for="sk-estimator-id-11" class="sk-toggleable__label sk-toggleable__label-arrow">SimpleImputer</label><div class="sk-toggleable__content"><pre>SimpleImputer(fill_value=&#x27;Missing&#x27;, keep_empty_features=True,
+              strategy=&#x27;constant&#x27;)</pre></div></div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-12" type="checkbox" ><label for="sk-estimator-id-12" class="sk-toggleable__label sk-toggleable__label-arrow">OneHotEncoder</label><div class="sk-toggleable__content"><pre>OneHotEncoder(drop=&#x27;first&#x27;, handle_unknown=&#x27;infrequent_if_exist&#x27;,
+              min_frequency=0.01)</pre></div></div></div></div></div></div></div></div></div></div><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-13" type="checkbox" ><label for="sk-estimator-id-13" class="sk-toggleable__label sk-toggleable__label-arrow">LogisticRegression</label><div class="sk-toggleable__content"><pre>LogisticRegression(max_iter=2000, random_state=42)</pre></div></div></div></div></div></div></div></div></div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Comprobación: el Pipeline aprende parámetros distintos en cada pliegue (no se comparten entre entrenamiento y validación)</span>
+<span class="n">tr</span><span class="p">,</span> <span class="n">va</span> <span class="o">=</span> <span class="n">folds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">p_a</span><span class="p">,</span> <span class="n">p_b</span> <span class="o">=</span> <span class="n">make_model_pipeline</span><span class="p">(</span><span class="n">final_cols</span><span class="p">[</span><span class="s2">"num_lin"</span><span class="p">],</span> <span class="n">final_cols</span><span class="p">[</span><span class="s2">"num_log"</span><span class="p">],</span> <span class="n">final_cols</span><span class="p">[</span><span class="s2">"cat"</span><span class="p">]),</span> <span class="n">make_model_pipeline</span><span class="p">(</span><span class="n">final_cols</span><span class="p">[</span><span class="s2">"num_lin"</span><span class="p">],</span> <span class="n">final_cols</span><span class="p">[</span><span class="s2">"num_log"</span><span class="p">],</span> <span class="n">final_cols</span><span class="p">[</span><span class="s2">"cat"</span><span class="p">])</span>
+<span class="n">p_a</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">tr</span><span class="p">],</span> <span class="n">y</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">tr</span><span class="p">]);</span> <span class="n">p_b</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">media_a</span> <span class="o">=</span> <span class="n">p_a</span><span class="o">.</span><span class="n">named_steps</span><span class="p">[</span><span class="s2">"prep"</span><span class="p">]</span><span class="o">.</span><span class="n">named_transformers_</span><span class="p">[</span><span class="s2">"num"</span><span class="p">]</span><span class="o">.</span><span class="n">named_steps</span><span class="p">[</span><span class="s2">"sc"</span><span class="p">]</span><span class="o">.</span><span class="n">mean_</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">media_b</span> <span class="o">=</span> <span class="n">p_b</span><span class="o">.</span><span class="n">named_steps</span><span class="p">[</span><span class="s2">"prep"</span><span class="p">]</span><span class="o">.</span><span class="n">named_transformers_</span><span class="p">[</span><span class="s2">"num"</span><span class="p">]</span><span class="o">.</span><span class="n">named_steps</span><span class="p">[</span><span class="s2">"sc"</span><span class="p">]</span><span class="o">.</span><span class="n">mean_</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">md_out</span><span class="p">(</span><span class="s2">"**Verificación anti-fuga.** Las medias usadas para estandarizar las primeras tres variables son "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">es</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">media_a</span><span class="p">)</span> <span class="o">+</span>
+       <span class="s2">" si el Pipeline se ajusta solo con el pliegue de entrenamiento y "</span> <span class="o">+</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">es</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">media_b</span><span class="p">)</span> <span class="o">+</span>
+       <span class="s2">" si se ajustara con todos los datos: son distintas, es decir, **cada pliegue aprende sus propios parámetros**."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<p><strong>Verificación anti-fuga.</strong> Las medias usadas para estandarizar las primeras tres variables son 4,381, 42,955, 1,339 si el Pipeline se ajusta solo con el pliegue de entrenamiento y 4,381, 42,892, 1,335 si se ajustara con todos los datos: son distintas, es decir, <strong>cada pliegue aprende sus propios parámetros</strong>.</p>
+</div>
+</div>
+</section>
+<section id="resumen-de-decisiones-de-preprocesamiento">
+<h2>Resumen de decisiones de preprocesamiento<a class="headerlink" href="#resumen-de-decisiones-de-preprocesamiento" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Paso</p></th>
+<th class="head"><p>Decisión</p></th>
+<th class="head"><p>Dónde se calcula</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Población</p></td>
+<td><p>Excluir altas por fallecimiento u hospicio (regla clínica)</p></td>
+<td><p>Capítulo 7</p></td>
+</tr>
+<tr class="row-odd"><td><p>Identificadores y objetivo original</p></td>
+<td><p>Excluir</p></td>
+<td><p>Capítulo 7</p></td>
+</tr>
+<tr class="row-even"><td><p>Constantes y &gt; 70 % de faltantes</p></td>
+<td><p>Excluir (umbral metodológico del proyecto)</p></td>
+<td><p>Entrenamiento</p></td>
+</tr>
+<tr class="row-odd"><td><p>Diagnósticos</p></td>
+<td><p>Agrupar en capítulos CIE-9</p></td>
+<td><p>Regla fija</p></td>
+</tr>
+<tr class="row-even"><td><p>Edad</p></td>
+<td><p>Punto medio del rango</p></td>
+<td><p>Regla fija</p></td>
+</tr>
+<tr class="row-odd"><td><p>Faltantes categóricos</p></td>
+<td><p>Categoría <code class="docutils literal notranslate"><span class="pre">Missing</span></code></p></td>
+<td><p>Pipeline</p></td>
+</tr>
+<tr class="row-even"><td><p>Categorías raras (&lt; 1 %)</p></td>
+<td><p>Agrupar; one-hot con primera categoría de referencia</p></td>
+<td><p>Pipeline (entrenamiento)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Conteos con cola larga</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">log1p</span></code> según el criterio de arriba</p></td>
+<td><p>Validación cruzada agrupada</p></td>
+</tr>
+<tr class="row-even"><td><p>Escalado</p></td>
+<td><p>Estandarización</p></td>
+<td><p>Pipeline (entrenamiento)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./notebooks"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="07_data_leakage.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">7. Auditoría de data leakage</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="09_modelo_base.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">9. Modelo base: línea base trivial y regresión logística</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#poblacion-de-modelado">Población de modelado</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#decisiones-de-limpieza">Decisiones de limpieza</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#transformacion-de-los-conteos-con-cola-larga-log1p-si-o-no">Transformación de los conteos con cola larga: ¿<code class="docutils literal notranslate"><span class="pre">log1p</span></code> sí o no?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pipeline-final">Pipeline final</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#resumen-de-decisiones-de-preprocesamiento">Resumen de decisiones de preprocesamiento</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Proyecto de Machine Learning — Maestría en Ingeniería Industrial
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
