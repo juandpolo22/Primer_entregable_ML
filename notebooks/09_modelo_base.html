@@ -1972,6 +1972,543 @@ trivial</strong>. Se responde con los números de este libro.</p>
 </ul>
 </div>
 </div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># =====================================================================================================</span>
+<span class="c1"># Revisión que pide el diagrama del enunciado cuando accuracy o R² ≥ 80–90 %:</span>
+<span class="c1"># verificar fuga, comparar con la línea base y revisar la complejidad; corregir y repetir,</span>
+<span class="c1"># o considerar un dataset más desafiante.</span>
+<span class="c1"># Las decisiones se toman SOLO con el entrenamiento (validación cruzada agrupada por paciente);</span>
+<span class="c1"># la prueba únicamente se reporta como referencia.</span>
+<span class="c1"># =====================================================================================================</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">sparse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.dummy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DummyClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">HistGradientBoostingClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">cross_val_score</span><span class="p">,</span> <span class="n">cross_validate</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">FunctionTransformer</span>
+
+<span class="n">UMBRAL_ACCURACY</span> <span class="o">=</span> <span class="mf">0.80</span>    <span class="c1"># el diagrama se activa con accuracy ≥ 0,80</span>
+<span class="n">UMBRAL_FUGA</span> <span class="o">=</span> <span class="mf">0.90</span>        <span class="c1"># AUC univariado por encima del cual una predictora es sospechosa (sección 2.5)</span>
+<span class="n">UMBRAL_TRIVIAL</span> <span class="o">=</span> <span class="mf">0.90</span>     <span class="c1"># AUC de la regresión logística (CV) por encima del cual el problema es demasiado fácil</span>
+<span class="n">MARGEN_ACC_PP</span> <span class="o">=</span> <span class="mf">1.0</span>       <span class="c1"># mejora mínima de accuracy sobre la línea base, en puntos porcentuales</span>
+<span class="n">MARGEN_AUC</span> <span class="o">=</span> <span class="mf">0.01</span>         <span class="c1"># mejora mínima de AUC para hablar de señal no lineal sin explotar</span>
+<span class="n">TOL_PERMUTACION</span> <span class="o">=</span> <span class="mf">0.02</span>    <span class="c1"># con etiquetas barajadas el AUC debe quedar a menos de 0,02 de 0,5</span>
+<span class="n">MAX_RONDAS</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">PERMUTAR_ETIQUETAS</span> <span class="o">=</span> <span class="kc">True</span>                        <span class="c1"># prueba de control contra fuga en el Pipeline</span>
+<span class="n">REVISAR_COMPLEJIDAD_CON_MODELO_FLEXIBLE</span> <span class="o">=</span> <span class="kc">True</span>   <span class="c1"># diagnóstico adicional, solo con validación cruzada</span>
+
+<span class="n">esquema</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"num_lin"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">num_lin</span><span class="p">),</span> <span class="s2">"num_log"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">num_log</span><span class="p">),</span> <span class="s2">"cat"</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">cat</span><span class="p">)}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">columnas_de</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">e</span><span class="p">[</span><span class="s2">"num_lin"</span><span class="p">]</span> <span class="o">+</span> <span class="n">e</span><span class="p">[</span><span class="s2">"num_log"</span><span class="p">]</span> <span class="o">+</span> <span class="n">e</span><span class="p">[</span><span class="s2">"cat"</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pipeline_de</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">make_model_pipeline</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="s2">"num_lin"</span><span class="p">],</span> <span class="n">e</span><span class="p">[</span><span class="s2">"num_log"</span><span class="p">],</span> <span class="n">e</span><span class="p">[</span><span class="s2">"cat"</span><span class="p">])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">auc_univariado_train</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""AUC de cada predictora por sí sola, con el entrenamiento (categóricas: tasa del objetivo fuera de pliegue)."""</span>
+    <span class="n">filas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">grupo</span><span class="p">,</span> <span class="n">tipo</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"num_lin"</span><span class="p">,</span> <span class="s2">"numérica"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"num_log"</span><span class="p">,</span> <span class="s2">"numérica"</span><span class="p">),</span> <span class="p">(</span><span class="s2">"cat"</span><span class="p">,</span> <span class="s2">"categórica"</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">e</span><span class="p">[</span><span class="n">grupo</span><span class="p">]:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">univariate_auc</span><span class="p">(</span><span class="n">Ftr</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">ytr</span><span class="p">)</span> <span class="k">if</span> <span class="n">tipo</span> <span class="o">==</span> <span class="s2">"numérica"</span> <span class="k">else</span> <span class="n">categorical_auc_oof</span><span class="p">(</span><span class="n">Ftr</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">ytr</span><span class="p">,</span> <span class="n">gtr</span><span class="p">)</span>
+            <span class="n">filas</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"variable"</span><span class="p">:</span> <span class="n">c</span><span class="p">,</span> <span class="s2">"tipo"</span><span class="p">:</span> <span class="n">tipo</span><span class="p">,</span> <span class="s2">"AUC univariado"</span><span class="p">:</span> <span class="n">a</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">filas</span><span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s2">"AUC univariado"</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------------------------------</span>
+<span class="c1"># 1) Verificar fuga y, si aparece, corregir (excluir la variable) y repetir</span>
+<span class="c1"># ---------------------------------------------------------------------------------------------------</span>
+<span class="n">scoring_rev</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"accuracy"</span><span class="p">:</span> <span class="s2">"accuracy"</span><span class="p">,</span> <span class="s2">"roc_auc"</span><span class="p">:</span> <span class="s2">"roc_auc"</span><span class="p">,</span> <span class="s2">"average_precision"</span><span class="p">:</span> <span class="s2">"average_precision"</span><span class="p">}</span>
+<span class="n">rondas</span><span class="p">,</span> <span class="n">quitadas</span><span class="p">,</span> <span class="n">sin_resolver</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="kc">False</span>
+<span class="k">for</span> <span class="n">ronda</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">MAX_RONDAS</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="n">columnas_de</span><span class="p">(</span><span class="n">esquema</span><span class="p">)</span>
+    <span class="n">uni</span> <span class="o">=</span> <span class="n">auc_univariado_train</span><span class="p">(</span><span class="n">esquema</span><span class="p">)</span>
+    <span class="n">sospechosas</span> <span class="o">=</span> <span class="n">uni</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">uni</span><span class="p">[</span><span class="s2">"AUC univariado"</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">UMBRAL_FUGA</span><span class="p">,</span> <span class="s2">"variable"</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">cv_lr</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">pipeline_de</span><span class="p">(</span><span class="n">esquema</span><span class="p">),</span> <span class="n">Xtr</span><span class="p">[</span><span class="n">cols</span><span class="p">],</span> <span class="n">ytr</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">folds</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">scoring_rev</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">error_score</span><span class="o">=</span><span class="s2">"raise"</span><span class="p">)</span>
+    <span class="n">cv_d</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">DummyClassifier</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">"most_frequent"</span><span class="p">),</span> <span class="n">Xtr</span><span class="p">[</span><span class="n">cols</span><span class="p">],</span> <span class="n">ytr</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">folds</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">scoring_rev</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">rondas</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+        <span class="s2">"ronda"</span><span class="p">:</span> <span class="n">ronda</span><span class="p">,</span> <span class="s2">"variables"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">),</span>
+        <span class="s2">"mayor AUC univariado"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">uni</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"AUC univariado"</span><span class="p">]),</span> <span class="s2">"variable"</span><span class="p">:</span> <span class="n">uni</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"variable"</span><span class="p">],</span>
+        <span class="s2">"sospechosas (&gt; </span><span class="si">%.2f</span><span class="s2">)"</span> <span class="o">%</span> <span class="n">UMBRAL_FUGA</span><span class="p">:</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sospechosas</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"ninguna"</span><span class="p">,</span>
+        <span class="s2">"accuracy Dummy"</span><span class="p">:</span> <span class="n">cv_d</span><span class="p">[</span><span class="s2">"test_accuracy"</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="s2">"accuracy LR"</span><span class="p">:</span> <span class="n">cv_lr</span><span class="p">[</span><span class="s2">"test_accuracy"</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+        <span class="s2">"AUC LR"</span><span class="p">:</span> <span class="n">cv_lr</span><span class="p">[</span><span class="s2">"test_roc_auc"</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="s2">"AP LR"</span><span class="p">:</span> <span class="n">cv_lr</span><span class="p">[</span><span class="s2">"test_average_precision"</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+    <span class="p">})</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sospechosas</span><span class="p">:</span>
+        <span class="k">break</span>
+    <span class="n">quitadas</span> <span class="o">+=</span> <span class="n">sospechosas</span>                                   <span class="c1"># corregir: sacar las variables sospechosas de X</span>
+    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">esquema</span><span class="p">:</span>
+        <span class="n">esquema</span><span class="p">[</span><span class="n">g</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">esquema</span><span class="p">[</span><span class="n">g</span><span class="p">]</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sospechosas</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">ronda</span> <span class="o">==</span> <span class="n">MAX_RONDAS</span><span class="p">:</span>
+        <span class="n">sin_resolver</span> <span class="o">=</span> <span class="kc">True</span>                                   <span class="c1"># repetir no alcanzó: queda fuga por revisar</span>
+<span class="n">tabla_rondas</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rondas</span><span class="p">)</span>
+<span class="n">tabla_rondas</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"revision_diagrama_rondas.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">tabla_rondas</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+
+<span class="n">cols</span> <span class="o">=</span> <span class="n">columnas_de</span><span class="p">(</span><span class="n">esquema</span><span class="p">)</span>
+<span class="n">final</span> <span class="o">=</span> <span class="n">rondas</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">acc_lr</span><span class="p">,</span> <span class="n">acc_d</span><span class="p">,</span> <span class="n">auc_lr</span><span class="p">,</span> <span class="n">ap_lr</span> <span class="o">=</span> <span class="n">final</span><span class="p">[</span><span class="s2">"accuracy LR"</span><span class="p">],</span> <span class="n">final</span><span class="p">[</span><span class="s2">"accuracy Dummy"</span><span class="p">],</span> <span class="n">final</span><span class="p">[</span><span class="s2">"AUC LR"</span><span class="p">],</span> <span class="n">final</span><span class="p">[</span><span class="s2">"AP LR"</span><span class="p">]</span>
+<span class="n">acc_test</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">skm</span><span class="o">.</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">yte</span><span class="p">,</span> <span class="n">pred_lr</span><span class="p">))</span>            <span class="c1"># solo como referencia</span>
+
+<span class="c1"># Controles adicionales de fuga (sección 2.5)</span>
+<span class="n">pacientes_compartidos</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">gtr</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">gte</span><span class="p">))</span>
+<span class="n">prohibidas</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">{</span><span class="n">TARGET</span><span class="p">,</span> <span class="n">RAW_TARGET</span><span class="p">,</span> <span class="n">ID_COL</span><span class="p">,</span> <span class="n">GROUP_COL</span><span class="p">})</span>
+<span class="n">auc_perm</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">if</span> <span class="n">PERMUTAR_ETIQUETAS</span><span class="p">:</span>
+    <span class="n">y_perm</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">RANDOM_STATE</span><span class="p">)</span><span class="o">.</span><span class="n">permutation</span><span class="p">(</span><span class="n">ytr</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()),</span> <span class="n">index</span><span class="o">=</span><span class="n">ytr</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="n">auc_perm</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cross_val_score</span><span class="p">(</span><span class="n">pipeline_de</span><span class="p">(</span><span class="n">esquema</span><span class="p">),</span> <span class="n">Xtr</span><span class="p">[</span><span class="n">cols</span><span class="p">],</span> <span class="n">y_perm</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">folds</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s2">"roc_auc"</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="n">perm_ok</span> <span class="o">=</span> <span class="n">auc_perm</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">abs</span><span class="p">(</span><span class="n">auc_perm</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">TOL_PERMUTACION</span>
+
+<span class="c1"># ---------------------------------------------------------------------------------------------------</span>
+<span class="c1"># 2) Comparar con la línea base y 3) revisar la complejidad</span>
+<span class="c1"># ---------------------------------------------------------------------------------------------------</span>
+<span class="n">mejora_acc_pp</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">acc_lr</span> <span class="o">-</span> <span class="n">acc_d</span><span class="p">)</span>
+<span class="n">n_codificadas</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">make_preprocessor</span><span class="p">(</span><span class="n">esquema</span><span class="p">[</span><span class="s2">"num_lin"</span><span class="p">],</span> <span class="n">esquema</span><span class="p">[</span><span class="s2">"num_log"</span><span class="p">],</span> <span class="n">esquema</span><span class="p">[</span><span class="s2">"cat"</span><span class="p">])</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xtr</span><span class="p">[</span><span class="n">cols</span><span class="p">])</span><span class="o">.</span><span class="n">get_feature_names_out</span><span class="p">())</span>
+<span class="n">n_train</span><span class="p">,</span> <span class="n">n_pacientes</span><span class="p">,</span> <span class="n">n_minoritaria</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Xtr</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">gtr</span><span class="o">.</span><span class="n">nunique</span><span class="p">()),</span> <span class="nb">int</span><span class="p">(</span><span class="n">ytr</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+<span class="n">auc_flex</span> <span class="o">=</span> <span class="n">ap_flex</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">if</span> <span class="n">REVISAR_COMPLEJIDAD_CON_MODELO_FLEXIBLE</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">a_denso</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span> <span class="k">if</span> <span class="n">sparse</span><span class="o">.</span><span class="n">issparse</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="n">flexible</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+        <span class="p">(</span><span class="s2">"prep"</span><span class="p">,</span> <span class="n">make_preprocessor</span><span class="p">(</span><span class="n">esquema</span><span class="p">[</span><span class="s2">"num_lin"</span><span class="p">],</span> <span class="n">esquema</span><span class="p">[</span><span class="s2">"num_log"</span><span class="p">],</span> <span class="n">esquema</span><span class="p">[</span><span class="s2">"cat"</span><span class="p">])),</span>
+        <span class="p">(</span><span class="s2">"denso"</span><span class="p">,</span> <span class="n">FunctionTransformer</span><span class="p">(</span><span class="n">a_denso</span><span class="p">)),</span>
+        <span class="p">(</span><span class="s2">"clf"</span><span class="p">,</span> <span class="n">HistGradientBoostingClassifier</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">RANDOM_STATE</span><span class="p">)),</span>
+    <span class="p">])</span>
+    <span class="n">r_flex</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">flexible</span><span class="p">,</span> <span class="n">Xtr</span><span class="p">[</span><span class="n">cols</span><span class="p">],</span> <span class="n">ytr</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">folds</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="p">{</span><span class="s2">"roc_auc"</span><span class="p">:</span> <span class="s2">"roc_auc"</span><span class="p">,</span> <span class="s2">"average_precision"</span><span class="p">:</span> <span class="s2">"average_precision"</span><span class="p">},</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">auc_flex</span><span class="p">,</span> <span class="n">ap_flex</span> <span class="o">=</span> <span class="n">r_flex</span><span class="p">[</span><span class="s2">"test_roc_auc"</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">r_flex</span><span class="p">[</span><span class="s2">"test_average_precision"</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+<span class="c1"># ---------------------------------------------------------------------------------------------------</span>
+<span class="c1"># 4) Decisión del diagrama</span>
+<span class="c1"># ---------------------------------------------------------------------------------------------------</span>
+<span class="n">activa</span> <span class="o">=</span> <span class="n">acc_lr</span> <span class="o">&gt;=</span> <span class="n">UMBRAL_ACCURACY</span>
+<span class="n">acc_es_artefacto</span> <span class="o">=</span> <span class="n">activa</span> <span class="ow">and</span> <span class="n">mejora_acc_pp</span> <span class="o">&lt;</span> <span class="n">MARGEN_ACC_PP</span>
+<span class="n">fuga_pendiente</span> <span class="o">=</span> <span class="n">sin_resolver</span> <span class="ow">or</span> <span class="n">pacientes_compartidos</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="n">prohibidas</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">perm_ok</span>
+<span class="n">trivial</span> <span class="o">=</span> <span class="n">auc_lr</span> <span class="o">&gt;=</span> <span class="n">UMBRAL_TRIVIAL</span>
+<span class="n">sin_senal</span> <span class="o">=</span> <span class="n">auc_lr</span> <span class="o">&lt;</span> <span class="mf">0.55</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="n">activa</span><span class="p">:</span>
+    <span class="n">decision</span> <span class="o">=</span> <span class="s2">"El diagrama NO se activa (accuracy &lt; 0,80): el análisis pasa directamente al entregable."</span>
+<span class="k">elif</span> <span class="n">fuga_pendiente</span><span class="p">:</span>
+    <span class="n">decision</span> <span class="o">=</span> <span class="s2">"CORREGIR Y REPETIR: queda una posible fuga sin resolver (revisar la partición, el Pipeline o las variables señaladas)."</span>
+<span class="k">elif</span> <span class="n">trivial</span><span class="p">:</span>
+    <span class="n">decision</span> <span class="o">=</span> <span class="s2">"CONSIDERAR UN DATASET MÁS DESAFIANTE: el problema resulta trivial aun sin fuga."</span>
+<span class="k">elif</span> <span class="n">quitadas</span><span class="p">:</span>
+    <span class="n">decision</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"CORREGIDO Y REPETIDO: se excluyeron </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">quitadas</span><span class="p">)</span><span class="si">}</span><span class="s2"> y el análisis se repitió; con esas variables fuera, el dataset se mantiene."</span>
+<span class="k">elif</span> <span class="n">sin_senal</span><span class="p">:</span>
+    <span class="n">decision</span> <span class="o">=</span> <span class="s2">"MANTENER EL DATASET, CON CAUTELA: no hay fuga, pero la señal disponible es casi nula (AUC cercano a 0,5)."</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">decision</span> <span class="o">=</span> <span class="s2">"MANTENER EL DATASET: sin fuga que corregir y sin ser un problema trivial; no hace falta repetir el análisis ni buscar otro."</span>
+
+<span class="n">controles</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span>
+    <span class="p">{</span><span class="s2">"control"</span><span class="p">:</span> <span class="s2">"Accuracy en CV (entrenamiento) ≥ 0,80 (se activa el diagrama)"</span><span class="p">,</span> <span class="s2">"resultado"</span><span class="p">:</span> <span class="n">es</span><span class="p">(</span><span class="n">acc_lr</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="s2">"criterio"</span><span class="p">:</span> <span class="s2">"≥ 0,80"</span><span class="p">,</span> <span class="s2">"alerta"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">activa</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">"control"</span><span class="p">:</span> <span class="s2">"Variables con AUC univariado &gt; 0,90 (excluidas)"</span><span class="p">,</span> <span class="s2">"resultado"</span><span class="p">:</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">quitadas</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"ninguna"</span><span class="p">,</span> <span class="s2">"criterio"</span><span class="p">:</span> <span class="s2">"ninguna"</span><span class="p">,</span> <span class="s2">"alerta"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">quitadas</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">"control"</span><span class="p">:</span> <span class="s2">"Pacientes compartidos entre entrenamiento y prueba"</span><span class="p">,</span> <span class="s2">"resultado"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">pacientes_compartidos</span><span class="p">),</span> <span class="s2">"criterio"</span><span class="p">:</span> <span class="s2">"0"</span><span class="p">,</span> <span class="s2">"alerta"</span><span class="p">:</span> <span class="n">pacientes_compartidos</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">"control"</span><span class="p">:</span> <span class="s2">"Objetivo, su fuente o identificadores dentro de X"</span><span class="p">,</span> <span class="s2">"resultado"</span><span class="p">:</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">prohibidas</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"ninguno"</span><span class="p">,</span> <span class="s2">"criterio"</span><span class="p">:</span> <span class="s2">"ninguno"</span><span class="p">,</span> <span class="s2">"alerta"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">prohibidas</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">"control"</span><span class="p">:</span> <span class="s2">"AUC con etiquetas barajadas (control de fuga en el Pipeline)"</span><span class="p">,</span> <span class="s2">"resultado"</span><span class="p">:</span> <span class="n">es</span><span class="p">(</span><span class="n">auc_perm</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">auc_perm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">"no ejecutado"</span><span class="p">,</span> <span class="s2">"criterio"</span><span class="p">:</span> <span class="s2">"≈ 0,5 (±0,02)"</span><span class="p">,</span> <span class="s2">"alerta"</span><span class="p">:</span> <span class="ow">not</span> <span class="n">perm_ok</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">"control"</span><span class="p">:</span> <span class="s2">"Mejora del accuracy sobre el Dummy (pp)"</span><span class="p">,</span> <span class="s2">"resultado"</span><span class="p">:</span> <span class="n">es</span><span class="p">(</span><span class="n">mejora_acc_pp</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="s2">"criterio"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"≥ </span><span class="si">{</span><span class="n">MARGEN_ACC_PP</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> pp para aportar"</span><span class="p">,</span> <span class="s2">"alerta"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">acc_es_artefacto</span><span class="p">)},</span>
+    <span class="p">{</span><span class="s2">"control"</span><span class="p">:</span> <span class="s2">"AUC de la regresión logística (CV)"</span><span class="p">,</span> <span class="s2">"resultado"</span><span class="p">:</span> <span class="n">es</span><span class="p">(</span><span class="n">auc_lr</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="s2">"criterio"</span><span class="p">:</span> <span class="s2">"&lt; 0,90 (no trivial)"</span><span class="p">,</span> <span class="s2">"alerta"</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">trivial</span><span class="p">)},</span>
+<span class="p">])</span>
+<span class="k">if</span> <span class="n">auc_flex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">controles</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">controles</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"control"</span><span class="p">:</span> <span class="s2">"AUC de un modelo flexible (HistGradientBoosting, solo CV)"</span><span class="p">,</span> <span class="s2">"resultado"</span><span class="p">:</span> <span class="n">es</span><span class="p">(</span><span class="n">auc_flex</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                                     <span class="s2">"criterio"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"+</span><span class="si">{</span><span class="n">MARGEN_AUC</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> sobre la logística = señal no lineal"</span><span class="p">,</span> <span class="s2">"alerta"</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+<span class="n">controles</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"revision_diagrama_controles.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([{</span><span class="s2">"decision"</span><span class="p">:</span> <span class="n">decision</span><span class="p">,</span> <span class="s2">"activa_revision"</span><span class="p">:</span> <span class="n">activa</span><span class="p">,</span> <span class="s2">"variables_excluidas"</span><span class="p">:</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">quitadas</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">"ninguna"</span><span class="p">,</span>
+               <span class="s2">"accuracy_cv"</span><span class="p">:</span> <span class="n">acc_lr</span><span class="p">,</span> <span class="s2">"accuracy_dummy_cv"</span><span class="p">:</span> <span class="n">acc_d</span><span class="p">,</span> <span class="s2">"auc_cv"</span><span class="p">:</span> <span class="n">auc_lr</span><span class="p">}])</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"revision_diagrama_decision.csv"</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">controles</span><span class="p">)</span>
+
+<span class="n">txt_flex</span> <span class="o">=</span> <span class="s2">""</span>
+<span class="k">if</span> <span class="n">auc_flex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">txt_flex</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">" Un modelo flexible (solo CV) llega a AUC </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">auc_flex</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">: "</span>
+                <span class="o">+</span> <span class="p">(</span><span class="s2">"hay señal no lineal sin explotar."</span> <span class="k">if</span> <span class="n">auc_flex</span> <span class="o">-</span> <span class="n">auc_lr</span> <span class="o">&gt;=</span> <span class="n">MARGEN_AUC</span>
+                   <span class="k">else</span> <span class="s2">"la señal adicional es pequeña, así que la mejora vendría sobre todo de mejores variables."</span><span class="p">))</span>
+<span class="n">txt_fuga</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"se excluyeron </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">quitadas</span><span class="p">)</span><span class="si">}</span><span class="s2"> y se repitió el ajuste. "</span> <span class="k">if</span> <span class="n">quitadas</span> <span class="k">else</span>
+            <span class="sa">f</span><span class="s2">"ninguna predictora supera </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">UMBRAL_FUGA</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> de AUC univariado (la mayor es `</span><span class="si">{</span><span class="n">final</span><span class="p">[</span><span class="s1">'variable'</span><span class="p">]</span><span class="si">}</span><span class="s2">`, </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">final</span><span class="p">[</span><span class="s1">'mayor AUC univariado'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">). "</span><span class="p">)</span>
+<span class="n">lineas</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sa">f</span><span class="s2">"- **Disparador:** el accuracy es </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">acc_lr</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> en validación cruzada (</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">acc_test</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> en la prueba), "</span>
+    <span class="o">+</span> <span class="p">(</span><span class="s2">"≥ 0,80: **se activa la revisión**."</span> <span class="k">if</span> <span class="n">activa</span> <span class="k">else</span> <span class="s2">"&lt; 0,80: no se activa."</span><span class="p">),</span>
+    <span class="sa">f</span><span class="s2">"- **Fuga (2.5–2.8):** rondas de revisión: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">rondas</span><span class="p">)</span><span class="si">}</span><span class="s2">; "</span> <span class="o">+</span> <span class="n">txt_fuga</span>
+    <span class="o">+</span> <span class="sa">f</span><span class="s2">"Pacientes compartidos entre entrenamiento y prueba: </span><span class="si">{</span><span class="n">pacientes_compartidos</span><span class="si">}</span><span class="s2">. "</span>
+    <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"Con las etiquetas barajadas el AUC es </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">auc_perm</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> (≈ 0,5), así que el Pipeline no filtra información del objetivo. "</span> <span class="k">if</span> <span class="n">auc_perm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="o">+</span> <span class="s2">"Las secciones 2.6–2.8 no aplican (sin fecha ni coordenadas)."</span><span class="p">,</span>
+    <span class="sa">f</span><span class="s2">"- **Línea base:** el Dummy obtiene </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">acc_d</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> de accuracy y la regresión logística </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">acc_lr</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> (diferencia de </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">mejora_acc_pp</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> pp). "</span>
+    <span class="o">+</span> <span class="p">(</span><span class="s2">"El accuracy alto es la proporción de la clase mayoritaria, **no** señal de buen desempeño."</span> <span class="k">if</span> <span class="n">acc_es_artefacto</span> <span class="k">else</span> <span class="s2">"El modelo mejora a la línea base."</span><span class="p">),</span>
+    <span class="sa">f</span><span class="s2">"- **Complejidad:** </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">n_train</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> encuentros de </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">n_pacientes</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> pacientes, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span><span class="si">}</span><span class="s2"> variables (</span><span class="si">{</span><span class="n">n_codificadas</span><span class="si">}</span><span class="s2"> tras codificar; "</span>
+    <span class="sa">f</span><span class="s2">"n/p ≈ </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">n_train</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">n_codificadas</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2">) y </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">n_minoritaria</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="si">}</span><span class="s2"> casos de la clase minoritaria. La logística alcanza AUC </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">auc_lr</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> y "</span>
+    <span class="sa">f</span><span class="s2">"Average Precision </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">ap_lr</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> (prevalencia </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">ytr</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">)."</span> <span class="o">+</span> <span class="n">txt_flex</span>
+    <span class="o">+</span> <span class="p">(</span><span class="s2">" El problema **no es trivial** (el AUC queda lejos de 0,90)."</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">trivial</span> <span class="k">else</span> <span class="s2">" El problema es trivial."</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="n">md_out</span><span class="p">(</span><span class="sa">f</span><span class="s2">"### Decisión del diagrama</span><span class="se">\n\n</span><span class="s2">**</span><span class="si">{</span><span class="n">decision</span><span class="si">}</span><span class="s2">**</span><span class="se">\n\n</span><span class="s2">"</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lineas</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>ronda</th>
+      <th>variables</th>
+      <th>mayor AUC univariado</th>
+      <th>variable</th>
+      <th>sospechosas (&gt; 0.90)</th>
+      <th>accuracy Dummy</th>
+      <th>accuracy LR</th>
+      <th>AUC LR</th>
+      <th>AP LR</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1</td>
+      <td>44</td>
+      <td>0.6107</td>
+      <td>number_inpatient</td>
+      <td>ninguna</td>
+      <td>0.8869</td>
+      <td>0.8866</td>
+      <td>0.6626</td>
+      <td>0.2077</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>control</th>
+      <th>resultado</th>
+      <th>criterio</th>
+      <th>alerta</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>Accuracy en CV (entrenamiento) ≥ 0,80 (se activa el diagrama)</td>
+      <td>0,887</td>
+      <td>≥ 0,80</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>Variables con AUC univariado &gt; 0,90 (excluidas)</td>
+      <td>ninguna</td>
+      <td>ninguna</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>Pacientes compartidos entre entrenamiento y prueba</td>
+      <td>0</td>
+      <td>0</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>Objetivo, su fuente o identificadores dentro de X</td>
+      <td>ninguno</td>
+      <td>ninguno</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>AUC con etiquetas barajadas (control de fuga en el Pipeline)</td>
+      <td>0,505</td>
+      <td>≈ 0,5 (±0,02)</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>Mejora del accuracy sobre el Dummy (pp)</td>
+      <td>-0,03</td>
+      <td>≥ 1 pp para aportar</td>
+      <td>True</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>AUC de la regresión logística (CV)</td>
+      <td>0,663</td>
+      <td>&lt; 0,90 (no trivial)</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>AUC de un modelo flexible (HistGradientBoosting, solo CV)</td>
+      <td>0,671</td>
+      <td>+0.01 sobre la logística = señal no lineal</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><h3 class="rubric" id="decision-del-diagrama">Decisión del diagrama</h3>
+<p><strong>MANTENER EL DATASET: sin fuga que corregir y sin ser un problema trivial; no hace falta repetir el análisis ni buscar otro.</strong></p>
+<ul class="simple">
+<li><p><strong>Disparador:</strong> el accuracy es 0,887 en validación cruzada (0,883 en la prueba), ≥ 0,80: <strong>se activa la revisión</strong>.</p></li>
+<li><p><strong>Fuga (2.5–2.8):</strong> rondas de revisión: 1; ninguna predictora supera 0,90 de AUC univariado (la mayor es <code class="docutils literal notranslate"><span class="pre">number_inpatient</span></code>, 0,611). Pacientes compartidos entre entrenamiento y prueba: 0. Con las etiquetas barajadas el AUC es 0,505 (≈ 0,5), así que el Pipeline no filtra información del objetivo. Las secciones 2.6–2.8 no aplican (sin fecha ni coordenadas).</p></li>
+<li><p><strong>Línea base:</strong> el Dummy obtiene 0,887 de accuracy y la regresión logística 0,887 (diferencia de -0,03 pp). El accuracy alto es la proporción de la clase mayoritaria, <strong>no</strong> señal de buen desempeño.</p></li>
+<li><p><strong>Complejidad:</strong> 79.473 encuentros de 55.990 pacientes, 44 variables (120 tras codificar; n/p ≈ 662) y 8.989 casos de la clase minoritaria. La logística alcanza AUC 0,663 y Average Precision 0,208 (prevalencia 0,113). Un modelo flexible (solo CV) llega a AUC 0,671: la señal adicional es pequeña, así que la mejora vendría sobre todo de mejores variables. El problema <strong>no es trivial</strong> (el AUC queda lejos de 0,90).</p></li>
+</ul>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># =====================================================================================================</span>
+<span class="c1"># Tratamiento del desbalance: regresión logística con pesos de clase («balanced»).</span>
+<span class="c1"># Es el mismo modelo, el mismo Pipeline y los mismos pliegues; solo cambia el peso de cada clase en la pérdida.</span>
+<span class="c1"># La decisión se toma con validación cruzada del ENTRENAMIENTO; la prueba se usa una sola vez, al final.</span>
+<span class="c1"># =====================================================================================================</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.calibration</span><span class="w"> </span><span class="kn">import</span> <span class="n">calibration_curve</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.dummy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DummyClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">balanced_accuracy_score</span><span class="p">,</span> <span class="n">brier_score_loss</span><span class="p">,</span> <span class="n">make_scorer</span><span class="p">,</span> <span class="n">precision_score</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">cross_validate</span>
+
+<span class="n">scoring_w</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"accuracy"</span><span class="p">:</span> <span class="s2">"accuracy"</span><span class="p">,</span> <span class="s2">"balanced_accuracy"</span><span class="p">:</span> <span class="s2">"balanced_accuracy"</span><span class="p">,</span> <span class="s2">"precision"</span><span class="p">:</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">precision_score</span><span class="p">,</span> <span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+             <span class="s2">"recall"</span><span class="p">:</span> <span class="s2">"recall"</span><span class="p">,</span> <span class="s2">"f1"</span><span class="p">:</span> <span class="s2">"f1"</span><span class="p">,</span> <span class="s2">"roc_auc"</span><span class="p">:</span> <span class="s2">"roc_auc"</span><span class="p">,</span> <span class="s2">"average_precision"</span><span class="p">:</span> <span class="s2">"average_precision"</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">modelo_con_pesos</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">make_model_pipeline</span><span class="p">(</span><span class="n">num_lin</span><span class="p">,</span> <span class="n">num_log</span><span class="p">,</span> <span class="n">cat</span><span class="p">,</span> <span class="n">class_weight</span><span class="o">=</span><span class="s2">"balanced"</span><span class="p">)</span>
+
+
+<span class="c1"># 1) Validación cruzada en entrenamiento (umbral 0,5): Dummy, logística sin pesos y logística con pesos</span>
+<span class="n">candidatos</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"Dummy (clase mayoritaria)"</span><span class="p">:</span> <span class="n">DummyClassifier</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">"most_frequent"</span><span class="p">),</span>
+              <span class="s2">"Logística sin pesos"</span><span class="p">:</span> <span class="n">nuevo_modelo</span><span class="p">(),</span>
+              <span class="s2">"Logística con pesos balanced"</span><span class="p">:</span> <span class="n">modelo_con_pesos</span><span class="p">()}</span>
+<span class="n">filas</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">nombre</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">candidatos</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">cross_validate</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">Xtr</span><span class="p">,</span> <span class="n">ytr</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="n">folds</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="n">scoring_w</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">error_score</span><span class="o">=</span><span class="s2">"raise"</span><span class="p">)</span>
+    <span class="n">filas</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"modelo"</span><span class="p">:</span> <span class="n">nombre</span><span class="p">,</span> <span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">r</span><span class="p">[</span><span class="sa">f</span><span class="s2">"test_</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">scoring_w</span><span class="p">}})</span>
+<span class="n">cv_pesos</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">filas</span><span class="p">)</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">"modelo"</span><span class="p">)</span>
+<span class="n">cv_pesos</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Accuracy"</span><span class="p">,</span> <span class="s2">"Balanced accuracy"</span><span class="p">,</span> <span class="s2">"Precision"</span><span class="p">,</span> <span class="s2">"Recall"</span><span class="p">,</span> <span class="s2">"F1"</span><span class="p">,</span> <span class="s2">"ROC-AUC"</span><span class="p">,</span> <span class="s2">"Average Precision"</span><span class="p">]</span>
+<span class="n">cv_pesos</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"cv_modelo_con_pesos.csv"</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">cv_pesos</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+
+<span class="c1"># 2) Ajuste final y evaluación única en la prueba (umbral 0,5)</span>
+<span class="n">dummy_w</span> <span class="o">=</span> <span class="n">DummyClassifier</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">"most_frequent"</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xtr</span><span class="p">,</span> <span class="n">ytr</span><span class="p">)</span>
+<span class="n">lr_w</span> <span class="o">=</span> <span class="n">modelo_con_pesos</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xtr</span><span class="p">,</span> <span class="n">ytr</span><span class="p">)</span>
+<span class="n">p_w</span> <span class="o">=</span> <span class="n">lr_w</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">Xte</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">pred_w</span> <span class="o">=</span> <span class="p">(</span><span class="n">p_w</span> <span class="o">&gt;=</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="n">pred_dummy_w</span> <span class="o">=</span> <span class="n">dummy_w</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xte</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fila_prueba</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">classification_metrics</span><span class="p">(</span><span class="n">yte</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="n">f</span><span class="p">[</span><span class="s2">"Balanced accuracy"</span><span class="p">]</span> <span class="o">=</span> <span class="n">balanced_accuracy_score</span><span class="p">(</span><span class="n">yte</span><span class="p">,</span> <span class="n">pred</span><span class="p">)</span>
+    <span class="n">f</span><span class="p">[</span><span class="s2">"Brier"</span><span class="p">]</span> <span class="o">=</span> <span class="n">brier_score_loss</span><span class="p">(</span><span class="n">yte</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="n">f</span><span class="p">[</span><span class="s2">"Predicciones positivas"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pred</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">f</span>
+
+
+<span class="n">prueba_pesos</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"Dummy (clase mayoritaria)"</span><span class="p">:</span> <span class="n">fila_prueba</span><span class="p">(</span><span class="n">pred_dummy_w</span><span class="p">,</span> <span class="n">dummy_w</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">Xte</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]),</span>
+                             <span class="s2">"Logística sin pesos"</span><span class="p">:</span> <span class="n">fila_prueba</span><span class="p">(</span><span class="n">pred_lr</span><span class="p">,</span> <span class="n">p_lr</span><span class="p">),</span>
+                             <span class="s2">"Logística con pesos balanced"</span><span class="p">:</span> <span class="n">fila_prueba</span><span class="p">(</span><span class="n">pred_w</span><span class="p">,</span> <span class="n">p_w</span><span class="p">)})</span><span class="o">.</span><span class="n">T</span>
+<span class="n">prueba_pesos</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TABLES</span> <span class="o">/</span> <span class="s2">"prueba_modelo_con_pesos.csv"</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">prueba_pesos</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+
+<span class="c1"># 3) Calibración: los pesos desplazan las probabilidades, así que se mide</span>
+<span class="n">f_sin</span><span class="p">,</span> <span class="n">m_sin</span> <span class="o">=</span> <span class="n">calibration_curve</span><span class="p">(</span><span class="n">yte</span><span class="p">,</span> <span class="n">p_lr</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s2">"quantile"</span><span class="p">)</span>
+<span class="n">f_con</span><span class="p">,</span> <span class="n">m_con</span> <span class="o">=</span> <span class="n">calibration_curve</span><span class="p">(</span><span class="n">yte</span><span class="p">,</span> <span class="n">p_w</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">strategy</span><span class="o">=</span><span class="s2">"quantile"</span><span class="p">)</span>
+<span class="n">desv_sin</span><span class="p">,</span> <span class="n">desv_con</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">f_sin</span> <span class="o">-</span> <span class="n">m_sin</span><span class="p">))),</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">f_con</span> <span class="o">-</span> <span class="n">m_con</span><span class="p">)))</span>
+
+<span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">cv_pesos</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">"Dummy (clase mayoritaria)"</span><span class="p">],</span> <span class="n">cv_pesos</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">"Logística sin pesos"</span><span class="p">],</span> <span class="n">cv_pesos</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">"Logística con pesos balanced"</span><span class="p">]</span>
+<span class="n">t_sin</span><span class="p">,</span> <span class="n">t_con</span> <span class="o">=</span> <span class="n">prueba_pesos</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">"Logística sin pesos"</span><span class="p">],</span> <span class="n">prueba_pesos</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">"Logística con pesos balanced"</span><span class="p">]</span>
+<span class="n">md_out</span><span class="p">(</span>
+    <span class="s2">"### Efecto de los pesos de clase</span><span class="se">\n\n</span><span class="s2">"</span>
+    <span class="sa">f</span><span class="s2">"- **Accuracy:** con pesos baja de </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s1">'Accuracy'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> a </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">'Accuracy'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> en validación cruzada (</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">t_sin</span><span class="p">[</span><span class="s1">'Accuracy'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> → </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">t_con</span><span class="p">[</span><span class="s1">'Accuracy'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> en la prueba). "</span>
+    <span class="sa">f</span><span class="s2">"No es un empeoramiento del modelo: sin pesos casi nunca predecía la clase minoritaria (</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">t_sin</span><span class="p">[</span><span class="s1">'Predicciones positivas'</span><span class="p">])</span><span class="si">}</span><span class="s2"> positivos en la prueba) y ahora sí (</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">t_con</span><span class="p">[</span><span class="s1">'Predicciones positivas'</span><span class="p">])</span><span class="si">}</span><span class="s2">). "</span>
+    <span class="sa">f</span><span class="s2">"El Dummy conserva </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="s1">'Accuracy'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+    <span class="sa">f</span><span class="s2">"- **Detección de reingresos:** el recall sube de </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s1">'Recall'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> a </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">'Recall'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> (prueba: </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">t_sin</span><span class="p">[</span><span class="s1">'Recall'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> → </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">t_con</span><span class="p">[</span><span class="s1">'Recall'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">); "</span>
+    <span class="sa">f</span><span class="s2">"la precisión baja de </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s1">'Precision'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> a </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">'Precision'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">, con más falsas alarmas. El F1 pasa de </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s1">'F1'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> a </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">'F1'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+    <span class="sa">f</span><span class="s2">"- **Balanced accuracy:** </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s1">'Balanced accuracy'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> → </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">'Balanced accuracy'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> (0,5 = azar).</span><span class="se">\n</span><span class="s2">"</span>
+    <span class="sa">f</span><span class="s2">"- **Capacidad de ordenar:** el AUC casi no cambia (</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s1">'ROC-AUC'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> → </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">'ROC-AUC'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">) ni el Average Precision (</span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="s1">'Average Precision'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2"> → </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="s1">'Average Precision'</span><span class="p">],</span><span class="w"> </span><span class="mi">3</span><span class="p">)</span><span class="si">}</span><span class="s2">): "</span>
+    <span class="s2">"los pesos mueven el punto de operación, no hacen al modelo más informativo.</span><span class="se">\n</span><span class="s2">"</span>
+    <span class="sa">f</span><span class="s2">"- **Calibración:** las probabilidades dejan de ser probabilidades reales (desviación media </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">desv_sin</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2"> → </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">desv_con</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2"> puntos porcentuales; "</span>
+    <span class="sa">f</span><span class="s2">"Brier </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">t_sin</span><span class="p">[</span><span class="s1">'Brier'</span><span class="p">],</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="si">}</span><span class="s2"> → </span><span class="si">{</span><span class="n">es</span><span class="p">(</span><span class="n">t_con</span><span class="p">[</span><span class="s1">'Brier'</span><span class="p">],</span><span class="w"> </span><span class="mi">4</span><span class="p">)</span><span class="si">}</span><span class="s2">). Si se quieren probabilidades, hay que usar el modelo sin pesos o recalibrar."</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Accuracy</th>
+      <th>Balanced accuracy</th>
+      <th>Precision</th>
+      <th>Recall</th>
+      <th>F1</th>
+      <th>ROC-AUC</th>
+      <th>Average Precision</th>
+    </tr>
+    <tr>
+      <th>modelo</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Dummy (clase mayoritaria)</th>
+      <td>0.8869</td>
+      <td>0.5000</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+      <td>0.000</td>
+      <td>0.5000</td>
+      <td>0.1131</td>
+    </tr>
+    <tr>
+      <th>Logística sin pesos</th>
+      <td>0.8866</td>
+      <td>0.5021</td>
+      <td>0.3962</td>
+      <td>0.0051</td>
+      <td>0.010</td>
+      <td>0.6626</td>
+      <td>0.2077</td>
+    </tr>
+    <tr>
+      <th>Logística con pesos balanced</th>
+      <td>0.6614</td>
+      <td>0.6169</td>
+      <td>0.1797</td>
+      <td>0.5593</td>
+      <td>0.272</td>
+      <td>0.6635</td>
+      <td>0.2055</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Accuracy</th>
+      <th>Precision</th>
+      <th>Recall</th>
+      <th>F1</th>
+      <th>ROC-AUC</th>
+      <th>Average Precision</th>
+      <th>Balanced accuracy</th>
+      <th>Brier</th>
+      <th>Predicciones positivas</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>Dummy (clase mayoritaria)</th>
+      <td>0.8830</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+      <td>0.0000</td>
+      <td>0.5000</td>
+      <td>0.1170</td>
+      <td>0.5000</td>
+      <td>0.1170</td>
+      <td>0.0</td>
+    </tr>
+    <tr>
+      <th>Logística sin pesos</th>
+      <td>0.8829</td>
+      <td>0.4167</td>
+      <td>0.0022</td>
+      <td>0.0043</td>
+      <td>0.6575</td>
+      <td>0.2122</td>
+      <td>0.5009</td>
+      <td>0.0994</td>
+      <td>12.0</td>
+    </tr>
+    <tr>
+      <th>Logística con pesos balanced</th>
+      <td>0.6647</td>
+      <td>0.1880</td>
+      <td>0.5622</td>
+      <td>0.2818</td>
+      <td>0.6591</td>
+      <td>0.2116</td>
+      <td>0.6202</td>
+      <td>0.2264</td>
+      <td>6951.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div><h3 class="rubric" id="efecto-de-los-pesos-de-clase">Efecto de los pesos de clase</h3>
+<ul class="simple">
+<li><p><strong>Accuracy:</strong> con pesos baja de 0,887 a 0,661 en validación cruzada (0,883 → 0,665 en la prueba). No es un empeoramiento del modelo: sin pesos casi nunca predecía la clase minoritaria (12 positivos en la prueba) y ahora sí (6951). El Dummy conserva 0,887.</p></li>
+<li><p><strong>Detección de reingresos:</strong> el recall sube de 0,005 a 0,559 (prueba: 0,002 → 0,562); la precisión baja de 0,396 a 0,180, con más falsas alarmas. El F1 pasa de 0,010 a 0,272.</p></li>
+<li><p><strong>Balanced accuracy:</strong> 0,502 → 0,617 (0,5 = azar).</p></li>
+<li><p><strong>Capacidad de ordenar:</strong> el AUC casi no cambia (0,663 → 0,663) ni el Average Precision (0,208 → 0,205): los pesos mueven el punto de operación, no hacen al modelo más informativo.</p></li>
+<li><p><strong>Calibración:</strong> las probabilidades dejan de ser probabilidades reales (desviación media 0,6 → 34,8 puntos porcentuales; Brier 0,0994 → 0,2264). Si se quieren probabilidades, hay que usar el modelo sin pesos o recalibrar.</p></li>
+</ul>
+</div>
+</div>
 </section>
 <section id="residuos">
 <h2>10. Residuos<a class="headerlink" href="#residuos" title="Link to this heading">#</a></h2>
